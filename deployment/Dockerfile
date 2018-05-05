@@ -1,0 +1,13 @@
+FROM python:3
+
+ENV APPDIR=/home/src
+ENV PYTHONPATH=$PYTHONPATH:$APPDIR
+
+RUN mkdir -p $APPDIR
+WORKDIR $APPDIR
+
+ADD ./ $APPDIR/
+RUN pip install -r $APPDIR/requirements.txt
+
+EXPOSE 8000
+CMD /usr/local/bin/gunicorn -b 0.0.0.0:8000 file_service.wsgi:application

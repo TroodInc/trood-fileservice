@@ -1,0 +1,32 @@
+version: "2"
+
+services:
+  fileservice:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}.fileservice
+    volumes:
+      - ../:/home/src
+    environment:
+      DJANGO_CONFIGURATION: Production
+    networks:
+      - ${COMPOSE_PROJECT_NAME}-network
+
+  fileservice_postgres:
+    image: postgres:9.5
+    container_name: ${COMPOSE_PROJECT_NAME}.fileservice.postgres
+    environment: 
+      CONTAINER_NAME: ${COMPOSE_PROJECT_NAME}.fileservice.postgres
+    volumes:
+      - ./postgres/${CONTAINER_NAME}/data:/var/lib/postgresql/data
+      - ./postgres/${CONTAINER_NAME}/conf:/etc/postgresql
+      - ./postgres/${CONTAINER_NAME}/logs:/var/log/postgresql
+    environment:
+      LC_ALL: C.UTF-8
+      POSTGRES_DB: fileservice
+      POSTGRES_USER: fileservice
+      POSTGRES_PASSWORD: fileservice
+
+    networks:
+      - ${COMPOSE_PROJECT_NAME}-network
