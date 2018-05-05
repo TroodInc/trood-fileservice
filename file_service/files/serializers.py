@@ -113,4 +113,6 @@ class FileSerializer(serializers.ModelSerializer):
                 serializer = serializer(instance=instance.metadata)
                 result['metadata'] = serializer.data
 
+        result.pop('file')
+
         return result
