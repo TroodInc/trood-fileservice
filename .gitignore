@@ -1,3 +1,5 @@
+.fromgit
+
 deployment/postgres
 
 __pycache__
