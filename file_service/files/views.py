@@ -38,3 +38,7 @@ class FilesViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.deleted = True
         instance.save()
+
+
+class FilesExtensionManagerViewSet(viewsets.ModelViewSet):
+    pass
