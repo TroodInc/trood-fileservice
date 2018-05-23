@@ -18,7 +18,8 @@ def create_unique_filename(instance, filename):
 
 def validate_file_extention(value):
     ext = value.name.split('.')[-1]
-    if not ext.lower() in settings.ALLOWED_EXTENSIONS:
+    file_extensions = FileExtensions.objects.get_or_create(id=1)[0]
+    if not ext.lower() in file_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 

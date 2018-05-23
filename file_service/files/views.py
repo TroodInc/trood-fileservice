@@ -1,5 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ParseError
@@ -7,9 +6,6 @@ from rest_framework.parsers import FormParser, MultiPartParser
 
 from file_service.files import models, serializers
 from rest_framework.response import Response
-
-import requests
-from rest_framework.views import APIView
 
 
 class FilesViewSet(viewsets.ModelViewSet):
