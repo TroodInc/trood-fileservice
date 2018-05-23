@@ -11,6 +11,7 @@ admin.autodiscover()
 router = DefaultRouter()
 
 router.register(r'files', files_views.FilesViewSet)
+router.register(r'files_extensions', files_views.FilesExtensionManagerViewSet)
 
 urlpatterns = [
     url(r'^api/v1.0/', include(router.urls, namespace='api')),

@@ -81,3 +81,12 @@ class File(models.Model):
         self.size = self.file.size
 
         super(File, self).save(*args, **kwargs)
+
+
+class FileExtensions(models.Model):
+    allowed_extensions = models.TextField(blank=True, null=True,
+                                            default='jpg, jpeg, png, wav, aac, '
+                                                    'mp3, ogg, m4a, amr')
+
+    def get_allowed_extensions(self):
+        return self.allowed_extensions.splitlines()

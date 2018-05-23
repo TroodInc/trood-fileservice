@@ -1,3 +1,4 @@
+import json
 import os
 from uuid import uuid4
 
@@ -116,3 +117,11 @@ class FileSerializer(serializers.ModelSerializer):
         result.pop('file')
 
         return result
+
+
+class FileExtensionsSerializer(serializers.ModelSerializer):
+    allowed_extensions = serializers.JSONField()
+
+    class Meta:
+        model = files_models.FileExtensions
+        fields = ('allowed_extensions',)
