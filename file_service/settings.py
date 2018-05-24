@@ -98,7 +98,6 @@ USE_L10N = True
 USE_TZ = True
 
 DATE_FORMAT = '%d-%m-%Y'
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
 
@@ -117,9 +116,6 @@ if DEBUG and DEBUG_TOOLBAR:
 # Absolute url
 FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
 
-ALLOWED_EXTENSIONS = (
-    'jpg', 'jpeg', 'png', 'wav', 'aac', 'mp3', 'ogg', 'm4a', 'amr',
-)
 
 IMAGE_SIZES = {
     'small': 128,

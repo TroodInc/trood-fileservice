@@ -18,7 +18,8 @@ def create_unique_filename(instance, filename):
 
 def validate_file_extention(value):
     ext = value.name.split('.')[-1]
-    if not ext.lower() in settings.ALLOWED_EXTENSIONS:
+    file_extensions = FileExtensions.objects.get_or_create(id=1)[0]
+    if not ext.lower() in file_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 
@@ -81,3 +82,12 @@ class File(models.Model):
         self.size = self.file.size
 
         super(File, self).save(*args, **kwargs)
+
+
+class FileExtensions(models.Model):
+    allowed_extensions = models.TextField(blank=True, null=True,
+                                            default='jpg, jpeg, png, wav, aac, '
+                                                    'mp3, ogg, m4a, amr')
+
+    def get_allowed_extensions(self):
+        return self.allowed_extensions.splitlines()
