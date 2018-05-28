@@ -4,5 +4,8 @@ deployment/postgres
 
 __pycache__
 *.pyc
+.idea/*
 
 .DS_Store
+
+file_service/local_settings.py
