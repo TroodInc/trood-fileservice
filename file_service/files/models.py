@@ -8,8 +8,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
-from file_service import settings
-
 
 def create_unique_filename(instance, filename):
     name, ext = os.path.splitext(filename)
@@ -18,7 +16,9 @@ def create_unique_filename(instance, filename):
 
 def validate_file_extention(value):
     ext = value.name.split('.')[-1]
-    if not ext.lower() in settings.ALLOWED_EXTENSIONS:
+    allowed_extensions = FileExtension.objects.all().values_list('extension',
+                                                                 flat=True)
+    if not ext.lower() in allowed_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 
@@ -81,3 +81,7 @@ class File(models.Model):
         self.size = self.file.size
 
         super(File, self).save(*args, **kwargs)
+
+
+class FileExtension(models.Model):
+    extension = models.CharField(max_length=255)

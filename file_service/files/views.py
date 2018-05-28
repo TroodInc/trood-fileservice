@@ -1,13 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
 from rest_framework.parsers import FormParser, MultiPartParser
 
 from file_service.files import models, serializers
 from rest_framework.response import Response
-
-import requests
 
 
 class FilesViewSet(viewsets.ModelViewSet):
@@ -38,3 +35,8 @@ class FilesViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.deleted = True
         instance.save()
+
+
+class FileExtensionViewSet(viewsets.ModelViewSet):
+    queryset = models.FileExtension.objects.all()
+    serializer_class = serializers.FileExtensionSerializer
