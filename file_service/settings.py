@@ -117,9 +117,6 @@ if DEBUG and DEBUG_TOOLBAR:
 # Absolute url
 FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
 
-ALLOWED_EXTENSIONS = (
-    'jpg', 'jpeg', 'png', 'wav', 'aac', 'mp3', 'ogg', 'm4a', 'amr',
-)
 
 IMAGE_SIZES = {
     'small': 128,

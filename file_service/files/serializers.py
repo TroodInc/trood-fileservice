@@ -116,3 +116,18 @@ class FileSerializer(serializers.ModelSerializer):
         result.pop('file')
 
         return result
+
+
+class FileExtensionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileExtension
+        fields = ('id', 'extension')
+
+    def save(self, **kwargs):
+        extension = self.validated_data['extension']
+        extension = extension.lower()
+
+        instance = super().save(**kwargs)
+        instance.extension = extension
+        instance.save()
+        return instance
