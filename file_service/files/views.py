@@ -6,7 +6,9 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from file_service.files import models, serializers
 from rest_framework.response import Response
 
+from trood_auth_client.abac_engine import TroodABACResource
 
+@TroodABACResource()
 class FilesViewSet(viewsets.ModelViewSet):
     parser_classes = (FormParser, MultiPartParser, )
 

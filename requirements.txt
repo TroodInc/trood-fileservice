@@ -11,4 +11,4 @@ python-magic==0.4.13
 
 gunicorn==19.7.1
 
-requests
+git+https://07de0218088728b42ee60f155c71990f1dc6a717:x-oauth-basic@github.com/Q-CIS-DEV/trood-auth-client.git#egg=trood-auth-client
