@@ -13,20 +13,12 @@ DATABASES = {
         'USER': 'fileservice',
         'PASSWORD': 'fileservice',
         'HOST': 'fileservice_postgres',
-        'PORT': '',
     }
 }
 
 SECRET_KEY = '783ae16754d4ce6d1de0a749fb0744f4'
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'testserver',
-    'mirror.{}'.format(os.environ.get('COMPOSE_PROJECT_NAME')),
-    'static.{}'.format(os.environ.get('COMPOSE_PROJECT_NAME')),
-    'notifications.{}'.format(os.environ.get('COMPOSE_PROJECT_NAME')),
-    '*'
-]
+ALLOWED_HOSTS = ['*', ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,12 +29,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'rest_framework.authtoken',
 
     'file_service.files',
 ]
 
-# @todo: add auth middleware
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,10 +44,12 @@ MIDDLEWARE_CLASSES = [
 
 ROOT_URLCONF = 'file_service.urls'
 
-# @todo: add auth middleware
+TROOD_AUTH_SERVICE_URL = os.environ.get('TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/')
+
 REST_FRAMEWORK = {
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'trood_auth_client.authentication.TroodTokenAuthentication',
+    ),
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.OrderingFilter',
         'rest_framework.filters.SearchFilter',
@@ -125,5 +117,4 @@ IMAGE_SIZES = {
     'xlarge': 1200
 }
 
-SCHEDULER_BACKEND_URL = os.environ.get('SCHEDULER_BACKEND_URL', None)
-API_TOKEN = os.environ.get('MIRROR_CX_API_TOKEN', None)
+DOMAIN = 'FILESERVICE'
