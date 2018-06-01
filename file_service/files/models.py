@@ -18,7 +18,7 @@ def validate_file_extention(value):
     ext = value.name.split('.')[-1]
     allowed_extensions = FileExtension.objects.all().values_list('extension',
                                                                  flat=True)
-    if not ext.lower() in allowed_extensions:
+    if not ext.lower() in allowed_extensions and "*" not in allowed_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 
