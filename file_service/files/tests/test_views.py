@@ -11,6 +11,7 @@ from rest_framework import status
 import elizabeth
 from file_service.files import models as file_models
 from file_service.files.models import FileExtension
+from trood_auth_client.authentication import TroodUser
 
 TEXT = elizabeth.Text()
 
@@ -33,10 +34,14 @@ def create_temp_file(ext='.txt', data=None):
 
 class FilesBehaviourTestCase(APITestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        super(FilesBehaviourTestCase, cls).setUpClass()
+    def setUp(cls):
         cls.client = APIClient()
+
+        trood_user = TroodUser({
+            "id": 1,
+        })
+
+        cls.client.force_authenticate(user=trood_user)
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_can_upload_image_file(self):
@@ -157,6 +162,12 @@ class FilesBehaviourTestCase(APITestCase):
 class FileExtensionTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
+        trood_user = TroodUser({
+            "id": 1,
+        })
+
+        self.client.force_authenticate(user=trood_user)
+
 
     def test_create_extension(self):
         data = {
