@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
 from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 
 from file_service.files import models, serializers
 from rest_framework.response import Response
@@ -15,6 +16,7 @@ class FilesViewSet(viewsets.ModelViewSet):
     queryset = models.File.objects.all()
     serializer_class = serializers.FileSerializer
     filter_fields = ('deleted', )
+    permission_classes = (IsAuthenticated, )
 
     @detail_route(methods=['PATCH'])
     def metadata(self, request, pk):
@@ -33,6 +35,9 @@ class FilesViewSet(viewsets.ModelViewSet):
 
         result = serializers.FileSerializer(file).data
         return Response(data=result, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user.id)
 
     def perform_destroy(self, instance):
         instance.deleted = True

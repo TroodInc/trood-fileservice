@@ -35,7 +35,7 @@ class File(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.UUIDField(_('Owner'), null=True)
+    owner = models.IntegerField(_('Owner'), null=True)
     created = models.DateTimeField(_('Created Date'), auto_now_add=True)
 
     file = models.FileField(_('File'), upload_to=create_unique_filename, validators=(validate_file_extention, ))
