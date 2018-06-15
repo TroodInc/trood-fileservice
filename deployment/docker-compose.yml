@@ -7,9 +7,9 @@ services:
       dockerfile: deployment/Dockerfile
     container_name: fileservice
     environment:
-      DJANGO_CONFIGURATION: Production
+      DJANGO_CONFIGURATION: Development
     networks:
-      - ${COMPOSE_PROJECT_NAME}-network
+      - test-network
 
   fileservice_postgres:
     image: postgres:9.5
@@ -25,4 +25,8 @@ services:
       POSTGRES_PASSWORD: fileservice
 
     networks:
-      - ${COMPOSE_PROJECT_NAME}-network
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
