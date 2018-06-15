@@ -44,6 +44,8 @@ class FilesViewSet(viewsets.ModelViewSet):
         instance.save()
 
 
+@TroodABACResource()
 class FileExtensionViewSet(viewsets.ModelViewSet):
     queryset = models.FileExtension.objects.all()
     serializer_class = serializers.FileExtensionSerializer
+    permission_classes = (IsAuthenticated,)
