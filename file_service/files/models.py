@@ -56,12 +56,7 @@ class File(models.Model):
         return self.filename if self.filename else 'No name'
 
     def save(self, *args, **kwargs):
-        self.origin_filename = self.file.name
-
         self.file.save(self.file.name, self.file, save=False)
-
-        if not self.filename:
-            self.filename = self.origin_filename
 
         self.mimetype = magic.from_file(self.file.path, mime=True)
 
