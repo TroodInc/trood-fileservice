@@ -98,10 +98,22 @@ class FileSerializer(serializers.ModelSerializer):
             'type', 'mimetype', 'size',
             'ready', 'metadata'
         )
-        read_only_fields = ('created', 'id', 'type', 'mimetype', 'size', 'file_url', 'origin_filename', )
+        read_only_fields = ('created', 'id', 'type', 'mimetype', 'size', 'file_url', )
 
     def get_file_url(self, obj):
         return settings.FILES_BASE_URL + obj.file.name
+
+    def to_internal_value(self, data):
+
+        if 'filename' not in data or data['filename'] == '':
+            data['filename'] = data['file'].name
+
+        data['origin_filename'] = data['file'].name
+
+        data = super(FileSerializer, self).to_internal_value(data)
+
+
+        return data
 
     def to_representation(self, instance):
         result = super(FileSerializer, self).to_representation(instance)
