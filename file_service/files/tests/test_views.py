@@ -2,7 +2,7 @@ import base64
 import os
 import tempfile
 
-from file_service import settings
+from django.conf import settings
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.reverse import reverse

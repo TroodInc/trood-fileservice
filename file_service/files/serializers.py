@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from file_service.files import models as files_models
 
-from file_service import settings
+from django.conf import settings
 
 
 def move_uploaded_file(file, name=str(uuid4())):
