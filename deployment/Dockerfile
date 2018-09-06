@@ -14,4 +14,4 @@ COPY ./pytest.ini $APPDIR/
 RUN pip install -r $APPDIR/requirements.txt
 
 EXPOSE 8000
-CMD /usr/local/bin/gunicorn -b 0.0.0.0:8000 --reload --access-logfile - file_service.wsgi:application
+CMD /usr/local/bin/gunicorn -w 4 -b 0.0.0.0:8000 --reload --access-logfile - file_service.wsgi:application
