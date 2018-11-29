@@ -42,8 +42,8 @@ class FilesBehaviourTestCase(APITestCase):
         FileExtension.objects.create(extension='jpg')
         FileExtension.objects.create(extension='aac')
 
-        FileType.objects.create(id="IMAGE", mime="image/jpeg")
-        FileType.objects.create(id="AUDIO", mime="audio/x-hx-aac-adts")
+        FileType.objects.get_or_create(id="IMAGE", mime="image/jpeg")
+        FileType.objects.get_or_create(id="AUDIO", mime="audio/x-hx-aac-adts")
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_can_upload_image_file(self):

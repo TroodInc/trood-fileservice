@@ -6,6 +6,22 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def update_types(apps, schema_editor):
+    File = apps.get_model("files", "File")
+    FileType = apps.get_model("files", "FileType")
+
+    FileType.objects.get_or_create(id='IMAGE', mime='image/jpeg')
+    FileType.objects.get_or_create(id='AUDIO', mime='audio/x-hx-aac-adts')
+
+    File.objects.filter(type='OTHER').update(type=None)
+
+
+def revert_types(apps, schema_editor):
+    File = apps.get_model("files", "File")
+
+    File.objects.filter(type=None).update(type='OTHER')
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -20,6 +36,11 @@ class Migration(migrations.Migration):
                 ('mime', models.TextField()),
             ],
         ),
+        migrations.AlterField(
+            model_name='file', name='type',
+            field=models.CharField(blank=True, null=True, max_length=24, verbose_name='Type'),
+        ),
+        migrations.RunPython(update_types, revert_types, atomic=False),
         migrations.AlterField(
             model_name='file',
             name='type',
