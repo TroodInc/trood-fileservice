@@ -144,3 +144,9 @@ class FileExtensionSerializer(serializers.ModelSerializer):
         instance.extension = extension
         instance.save()
         return instance
+
+
+class FileTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileType
+        fields = ('id', 'mime')
