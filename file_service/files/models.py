@@ -1,5 +1,4 @@
 import os
-import hashlib
 import magic
 import uuid
 
@@ -22,18 +21,12 @@ def validate_file_extention(value):
         raise ValidationError(_('Unsupported file type'))
 
 
+class FileType(models.Model):
+    id = models.CharField(primary_key=True, unique=True, max_length=32)
+    mime = models.TextField()
+
+
 class File(models.Model):
-
-    TYPE_OTHER = 'OTHER'
-    TYPE_AUDIO = 'AUDIO'
-    TYPE_IMAGE = 'IMAGE'
-
-    FILE_TYPES = (
-        (TYPE_OTHER, _('Other')),
-        (TYPE_AUDIO, _('Audio')),
-        (TYPE_IMAGE, _('Image')),
-    )
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.IntegerField(_('Owner'), null=True)
     created = models.DateTimeField(_('Created Date'), auto_now_add=True)
@@ -43,7 +36,7 @@ class File(models.Model):
     filename = models.CharField(max_length=128, blank=True, null=True)
     origin_filename = models.CharField(_('Original filename'), max_length=128, blank=True, null=True)
 
-    type = models.CharField(_('Type'), max_length=24, choices=FILE_TYPES, default=TYPE_OTHER)
+    type = models.ForeignKey(FileType, null=True, blank=True, on_delete=models.SET_NULL)
     mimetype = models.CharField(_('Mimetype'), max_length=128, blank=True, null=True)
     size = models.IntegerField(_('File size'))
     ready = models.BooleanField(_('Ready'), default=False)
@@ -61,17 +54,7 @@ class File(models.Model):
         self.mimetype = magic.from_file(self.file.path, mime=True)
 
         if self.mimetype:
-            maintype, subtype = self.mimetype.split('/')
-
-            if maintype == 'audio':
-                self.type = File.TYPE_AUDIO
-            elif maintype == 'image':
-                self.type = File.TYPE_IMAGE
-            else:
-                self.type = File.TYPE_OTHER
-
-        else:
-            self.type = File.TYPE_OTHER
+            self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
 
         self.size = self.file.size
 

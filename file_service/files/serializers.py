@@ -86,8 +86,9 @@ class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
 
     metadata_serializers = {
-        files_models.File.TYPE_AUDIO: AudioMetaDataSerializer,
-        files_models.File.TYPE_IMAGE: ImageMetaDataSerializer
+        # @todo: autoload custom serrializers
+        "AUDIO": AudioMetaDataSerializer,
+        "IMAGE": ImageMetaDataSerializer
     }
 
     class Meta:
