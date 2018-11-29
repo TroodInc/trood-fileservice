@@ -28,7 +28,7 @@ class FilesViewSet(viewsets.ModelViewSet):
         if not request.data.get('ready', False) in ['true', 'True', True]:
             serializer = serializers.MessageMetaDataSerializer(instance=file, data=request.data)
         else:
-            serializer = serializers.FileSerializer.metadata_serializers.get(file.type)(instance=file, data=request.data)
+            serializer = serializers.FileSerializer.metadata_serializers.get(file.type.id)(instance=file, data=request.data)
 
         serializer.is_valid(raise_exception=True)
         file = serializer.save()
