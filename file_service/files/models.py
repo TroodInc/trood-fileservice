@@ -1,6 +1,7 @@
 import os
 import magic
 import uuid
+import mimetypes
 
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
@@ -51,7 +52,10 @@ class File(models.Model):
     def save(self, *args, **kwargs):
         self.file.save(self.file.name, self.file, save=False)
 
-        self.mimetype = magic.from_file(self.file.path, mime=True)
+        self.mimetype, enc = mimetypes.guess_type(self.file.path)
+
+        if not self.mimetype:
+            self.mimetype = magic.from_file(self.file.path, mime=True)
 
         if self.mimetype:
             self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
