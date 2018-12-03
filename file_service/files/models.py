@@ -3,6 +3,7 @@ import magic
 import uuid
 import mimetypes
 
+from slugify import slugify
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -11,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 def create_unique_filename(instance, filename):
     name, ext = os.path.splitext(filename)
-    return '{}{}'.format(instance.id, ext)
+    return '{}-{}{}'.format(instance.created.strftime('%d-%m-%y-%H%M%S'), slugify(name), ext)
 
 
 def validate_file_extention(value):
