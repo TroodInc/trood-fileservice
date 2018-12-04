@@ -86,8 +86,9 @@ class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
 
     metadata_serializers = {
-        files_models.File.TYPE_AUDIO: AudioMetaDataSerializer,
-        files_models.File.TYPE_IMAGE: ImageMetaDataSerializer
+        # @todo: autoload custom serrializers
+        "AUDIO": AudioMetaDataSerializer,
+        "IMAGE": ImageMetaDataSerializer
     }
 
     class Meta:
@@ -143,3 +144,9 @@ class FileExtensionSerializer(serializers.ModelSerializer):
         instance.extension = extension
         instance.save()
         return instance
+
+
+class FileTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileType
+        fields = ('id', 'mime')

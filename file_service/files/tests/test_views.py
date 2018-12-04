@@ -9,14 +9,17 @@ from rest_framework.reverse import reverse
 from rest_framework import status
 
 from file_service.files import models as file_models
-from file_service.files.models import FileExtension
+from file_service.files.models import FileExtension, FileType
 from trood_auth_client.authentication import TroodUser
 
 aac_file_data = "//FQgCi//N4CAExhdmM1Ny44OS4xMDAAQjYf///8MACPslW0kC0TE0TC0LBc31HLWWcVF1U1lqfcrWhzJUSt2Otf//IYZnBrSL7MwvbLX0D7XXMXU/6889ow33jjGYuyV8DO0nBtk9c2PnoELJsgeAkY+fYUb+W+Z2VJm7GwZsGZhuwRMN0iJhmwHYDmI+cr8AnEr5QZEm6ZunYlff0lYLcP84ORJpErmITIWXe1mLinxBzo8CzywwCxMuhLgGBsByI+0lnLYppx5jYceouxDYbOAgIXKMkQZ7BUJYUFB6Jafrl479u6gJcuzSty3MCwEZ2zgU8py5GS5ZkWWZZ2pAz9kud1731ZZRAQFkmzPLsuOyqfMJZ8z8fnTLHjrSCLReHQ+LReLQ+FzfUctZZxUXVTWWp9ytaDDQ2AAAAAAAAAAAAAcP/xUIAqf/whGw////2NAEdYqvoaFo4FoYDooHo6C741Rz045vjLzVFpT8uEmRVUnneQP3Ow9Z7R/vKzf+V48TzVvGcz89SbrruJvu4+kge3N1C+Viqn6rvOF+9+9+B46+Q0jicTx20j8DjTPHazkaVLGsWuc1muvsDlM7GmVIs7OqWMbI2EXI5TicTOxrztMK82HI1mu41Nf8dynjtZrthyONYzuRxuY//uUWoA0la2WNyONambK+0ONyPWazZbDibDGqWM7O7Wbwdy8/sYv5fuho8Hiw4oQ3NqOpZqamaiyuizRZCEkNGaFGa7S7klkJKM0NSSdkhPFcSKi8iaS8jUzQ5N4ZoaklGpqZpqM1mpJcFGpMdGuvuRpG9xKMvOUqZ2djZHExw50Ii0Yi0Ih0Xi0nhd8ao56cc3xl5qi0p+XCTIqjWt4AAAAAAAAAAAAAAADg=="
 jpg_file_data = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q=="
 
-def create_temp_file(ext='.txt', data=None):
-    _, filename = tempfile.mkstemp(ext)
+def create_temp_file(ext='.txt', data=None, name=None):
+    if name:
+        filename = '{}/{}{}'.format(tempfile.gettempdir(), name, ext)
+    else:
+        _, filename = tempfile.mkstemp(ext)
     if data:
         tmp_file = open(filename, 'wb')
         tmp_file.write(base64.b64decode(data))
@@ -39,12 +42,16 @@ class FilesBehaviourTestCase(APITestCase):
         })
 
         cls.client.force_authenticate(user=trood_user)
+        FileExtension.objects.create(extension='jpg')
+        FileExtension.objects.create(extension='aac')
+
+        FileType.objects.get_or_create(id="IMAGE", mime="image/jpeg")
+        FileType.objects.get_or_create(id="AUDIO", mime="audio/x-hx-aac-adts")
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_can_upload_image_file(self):
-        FileExtension.objects.create(extension='jpg')
         url = reverse('api:file-list', )
-        test_file, test_file_path = create_temp_file('.jpg')
+        test_file, test_file_path = create_temp_file('.jpg', data=jpg_file_data)
         file_data = {'file': test_file, 'name': 'myfile'}
         response = self.client.post(url, data=file_data, format='multipart')
 
@@ -54,13 +61,13 @@ class FilesBehaviourTestCase(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(response.data['name'], 'myfile')
         self.assertEqual(response.data['size'], os.path.getsize(test_file_path))
-        self.assertContains(response, '{}{}'.format(settings.FILES_BASE_URL, response.data['id']))
+        self.assertEqual(response.data['mimetype'], 'image/jpeg')
+        self.assertEqual(response.data['type'], 'IMAGE')
+        self.assertIsNotNone(response.data['file_url'])
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_can_upload_audio_file(self):
-        FileExtension.objects.create(extension='aac')
         url = reverse('api:file-list', )
         test_file, test_file_path = create_temp_file('.aac', data=aac_file_data)
         file_data = {'file': test_file, 'name': 'myfile'}
@@ -72,8 +79,7 @@ class FilesBehaviourTestCase(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(response.data['name'], 'myfile')
-        self.assertEqual(response.data['type'], file_models.File.TYPE_AUDIO)
+        self.assertEqual(response.data['type'], 'AUDIO')
         self.assertEqual(response.data['mimetype'], 'audio/x-hx-aac-adts')
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
@@ -85,8 +91,15 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+    def test_filename_handling(self):
+        url = reverse('api:file-list', )
+        file_data = {'file': create_temp_file('.jpg', name=u'%4 Русский ..^!?? 影師嗎'), 'name': 'qqq'}
+        response = self.client.post(url, data=file_data, format='multipart')
+
+        self.assertContains(response, '4-russkii-ying-shi-ma', status_code=status.HTTP_201_CREATED)
+
+    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata(self):
-        FileExtension.objects.create(extension='aac')
         url = reverse('api:file-list', )
         file_data = {'file': create_temp_file('.aac', data=aac_file_data), 'name': 'myfile'}
         response = self.client.post(url, data=file_data, format='multipart')
@@ -105,7 +118,6 @@ class FilesBehaviourTestCase(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_image_file_metadata(self):
-        FileExtension.objects.create(extension='jpg')
         url = reverse('api:file-list', )
         file_data = {'file': create_temp_file('.jpg', data=jpg_file_data), 'name': 'myfile'}
         response = self.client.post(url, data=file_data, format='multipart')
@@ -123,22 +135,10 @@ class FilesBehaviourTestCase(APITestCase):
         response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(response.data['ready'], True)
-        self.assertEquals(
-            response.data['metadata']['small'], '{}{}_small.jpg'.format(settings.FILES_BASE_URL, response.data['id'])
-        )
-        self.assertEquals(
-            response.data['metadata']['medium'], '{}{}_medium.jpg'.format(settings.FILES_BASE_URL, response.data['id'])
-        )
-        self.assertEquals(
-            response.data['metadata']['large'], '{}{}_large.jpg'.format(settings.FILES_BASE_URL, response.data['id'])
-        )
-        self.assertEquals(
-            response.data['metadata']['xlarge'], '{}{}_xlarge.jpg'.format(settings.FILES_BASE_URL, response.data['id'])
-        )
+        self.assertIsNotNone(response.data['metadata'])
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata_with_error_message(self):
-        FileExtension.objects.create(extension='aac')
         url = reverse('api:file-list', )
         file_data = {'file': create_temp_file('.aac', data=aac_file_data), 'name': 'myfile'}
         response = self.client.post(url, data=file_data, format='multipart')

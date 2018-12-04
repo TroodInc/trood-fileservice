@@ -12,6 +12,7 @@ router = DefaultRouter()
 
 router.register(r'files', files_views.FilesViewSet)
 router.register(r'extensions', files_views.FileExtensionViewSet)
+router.register(r'types', files_views.FileTypeViewSet)
 
 urlpatterns = [
     url(r'^api/v1.0/', include(router.urls, namespace='api')),

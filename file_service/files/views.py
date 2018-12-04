@@ -7,9 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from file_service.files import models, serializers
 from rest_framework.response import Response
 
-from trood_auth_client.abac_engine import TroodABACResource
 
-@TroodABACResource()
 class FilesViewSet(viewsets.ModelViewSet):
     parser_classes = (FormParser, MultiPartParser, )
 
@@ -28,7 +26,7 @@ class FilesViewSet(viewsets.ModelViewSet):
         if not request.data.get('ready', False) in ['true', 'True', True]:
             serializer = serializers.MessageMetaDataSerializer(instance=file, data=request.data)
         else:
-            serializer = serializers.FileSerializer.metadata_serializers.get(file.type)(instance=file, data=request.data)
+            serializer = serializers.FileSerializer.metadata_serializers.get(file.type.id)(instance=file, data=request.data)
 
         serializer.is_valid(raise_exception=True)
         file = serializer.save()
@@ -44,8 +42,13 @@ class FilesViewSet(viewsets.ModelViewSet):
         instance.save()
 
 
-@TroodABACResource()
 class FileExtensionViewSet(viewsets.ModelViewSet):
     queryset = models.FileExtension.objects.all()
     serializer_class = serializers.FileExtensionSerializer
     permission_classes = (IsAuthenticated,)
+
+
+class FileTypeViewSet(viewsets.ModelViewSet):
+    queryset = models.FileType.objects.all()
+    serializer_class = serializers.FileTypeSerializer
+    permission_classes = (IsAuthenticated, )
