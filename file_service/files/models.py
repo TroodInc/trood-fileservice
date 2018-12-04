@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 
 def create_unique_filename(instance, filename):
     name, ext = os.path.splitext(filename)
-    return '{}-{}{}'.format(datetime.now().strftime('%d%m%y%H%M%S'), slugify(name), ext)
+    return '{}-{}{}'.format(slugify(name), datetime.now().strftime('%d%m%y%H%M%S'), ext)
 
 
 def validate_file_extention(value):
