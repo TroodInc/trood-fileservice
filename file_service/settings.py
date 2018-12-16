@@ -35,7 +35,10 @@ class BaseConfiguration(Configuration):
         'rest_framework',
 
         'file_service.files',
+        'file_service.trood_plugins',
     ]
+
+    TROOD_PLUGINS_PATH = 'plugins'
 
     MIDDLEWARE_CLASSES = [
         'django.middleware.security.SecurityMiddleware',
