@@ -52,8 +52,7 @@ class File(models.Model):
         return self.filename if self.filename else 'No name'
 
     def save(self, *args, **kwargs):
-        if not self.file.size:
-            self.file.save(self.file.name, self.file, save=False)
+        self.file.save(self.file.name, self.file, save=False)
 
         self.mimetype, enc = mimetypes.guess_type(self.file.path)
 

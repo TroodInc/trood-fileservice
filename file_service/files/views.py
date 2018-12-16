@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
-from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 
 from file_service.files import models, serializers
@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 
 class FilesViewSet(viewsets.ModelViewSet):
-    parser_classes = (FormParser, MultiPartParser, JSONParser)
+    parser_classes = (FormParser, MultiPartParser, )
 
     queryset = models.File.objects.all()
     serializer_class = serializers.FileSerializer
