@@ -106,13 +106,13 @@ class FileSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
 
-        if 'filename' not in data or data['filename'] == '':
-            data['filename'] = data['file'].name
+        if 'file' in data:
+            if 'filename' not in data or data['filename'] == '':
+                data['filename'] = data['file'].name
 
-        data['origin_filename'] = data['file'].name
+            data['origin_filename'] = data['file'].name
 
         data = super(FileSerializer, self).to_internal_value(data)
-
 
         return data
 

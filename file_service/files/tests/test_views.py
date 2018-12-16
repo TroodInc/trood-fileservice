@@ -93,7 +93,9 @@ class FilesBehaviourTestCase(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_filename_handling(self):
         url = reverse('api:file-list', )
-        file_data = {'file': create_temp_file('.jpg', name=u'%4 Русский ..^!?? 影師嗎'), 'name': 'qqq'}
+        file_data = {
+            'file': create_temp_file('.jpg', name=u'%4 Русский ..^!?? 影師嗎', data=jpg_file_data), 'name': 'qqq'
+        }
         response = self.client.post(url, data=file_data, format='multipart')
 
         self.assertContains(response, '4-russkii-ying-shi-ma', status_code=status.HTTP_201_CREATED)
