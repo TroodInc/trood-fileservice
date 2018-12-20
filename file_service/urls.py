@@ -4,7 +4,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
+from file_service.trood_plugins.views import TroodPluginsViewSet
 from .files import views as files_views
+
 
 admin.autodiscover()
 
@@ -13,6 +15,7 @@ router = DefaultRouter()
 router.register(r'files', files_views.FilesViewSet)
 router.register(r'extensions', files_views.FileExtensionViewSet)
 router.register(r'types', files_views.FileTypeViewSet)
+router.register(r'plugins', TroodPluginsViewSet)
 
 urlpatterns = [
     url(r'^api/v1.0/', include(router.urls, namespace='api')),
