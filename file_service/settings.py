@@ -55,6 +55,7 @@ class BaseConfiguration(Configuration):
 
     ROOT_URLCONF = 'file_service.urls'
 
+
     TROOD_AUTH_SERVICE_URL = os.environ.get(
         'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
         )
@@ -94,7 +95,7 @@ class BaseConfiguration(Configuration):
         ('en-US', 'English'),
     )
 
-    LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en-US')
+    LANGUAGE_CODE = values.Value('en-US', environ_prefix='')
 
     TIME_ZONE = 'UTC'
 
@@ -107,13 +108,13 @@ class BaseConfiguration(Configuration):
     DATE_FORMAT = '%d-%m-%Y'
 
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
+    MEDIA_ROOT = values.Value(rel('media'), environ_prefix='')
 
     STATIC_URL = '/static/'
-    STATIC_ROOT = os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
+    STATIC_ROOT = values.Value(rel('static'), environ_prefix='')
 
     # Absolute url
-    FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
+    FILES_BASE_URL = values.Value('/media/', environ_prefix='')
 
 
     IMAGE_SIZES = {
