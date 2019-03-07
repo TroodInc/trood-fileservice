@@ -1,5 +1,5 @@
 import os
-from configurations import Configuration
+from configurations import Configuration, values
 import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +22,9 @@ class BaseConfiguration(Configuration):
     # DOTENV = os.path.join(BASE_DIR, '.env')
     
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = '783ae16754d4ce6d1de0a749fb0744f4'
+    SECRET_KEY = values.Value(
+        '783ae16754d4ce6d1de0a749fb0744f4', environ_prefix=''
+    )
     
     # FIXME: we must setup that list
     ALLOWED_HOSTS = ['*', ]
@@ -55,12 +57,11 @@ class BaseConfiguration(Configuration):
 
     ROOT_URLCONF = 'file_service.urls'
 
+    TROOD_AUTH_SERVICE_URL = values.URLValue(
+        'http://authorization.trood:8000/', environ_prefix='')
 
-    TROOD_AUTH_SERVICE_URL = os.environ.get(
-        'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
-        )
-    SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
-    SERVICE_AUTH_SECRET = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
+    SERVICE_DOMAIN = values.Value('', environ_prefix='')
+    SERVICE_AUTH_SECRET = values.Value('', environ_prefix='')
 
     REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -95,7 +96,7 @@ class BaseConfiguration(Configuration):
         ('en-US', 'English'),
     )
 
-    LANGUAGE_CODE =  os.environ.get('LANGUAGE_CODE', 'en-US')
+    LANGUAGE_CODE = values.Value('en-US', environ_prefix='')
 
     TIME_ZONE = 'UTC'
 
@@ -108,13 +109,13 @@ class BaseConfiguration(Configuration):
     DATE_FORMAT = '%d-%m-%Y'
 
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
+    MEDIA_ROOT = values.Value(rel('media'), environ_prefix='')
 
     STATIC_URL = '/static/'
-    STATIC_ROOT =  os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
+    STATIC_ROOT = values.Value(rel('static'), environ_prefix='')
 
     # Absolute url
-    FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
+    FILES_BASE_URL = values.Value('/media/', environ_prefix='')
 
 
     IMAGE_SIZES = {
