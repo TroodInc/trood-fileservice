@@ -60,7 +60,7 @@ class BaseConfiguration(Configuration):
         'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
         )
     SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
-    SERVICE_AUTH_SECRET = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
+    SERVICE_AUTH_SECRET =  os.environ.get("SERVICE_AUTH_SECRET")
 
     REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
