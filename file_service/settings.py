@@ -170,11 +170,13 @@ class BaseConfiguration(Configuration):
         },
     }
 
-    RAVEN_CONFIG = {
-        'dsn': 'http://a1574ecfd6bc4c7b921e5b9e00d12f9f:764bf3e753884f2d9eb47cac7242ec80@sentry.dev.trood.ru/5',
-        'release': 'dev'
-    }
+    ENABLE_RAVEN = os.environ.get('ENABLE_RAVEN', "False")
 
+    if ENABLE_RAVEN == "True":
+        RAVEN_CONFIG = {
+            'dsn': os.environ.get('RAVEN_CONFIG_DSN'),
+            'release': os.environ.get('RAVEN_CONFIG_RELEASE')
+        }
 
 class Development(BaseConfiguration):
     DEBUG = True
