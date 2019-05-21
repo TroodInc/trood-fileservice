@@ -70,3 +70,10 @@ class File(models.Model):
 
 class FileExtension(models.Model):
     extension = models.CharField(max_length=255)
+
+
+class FileTemplate(models.Model):
+    id = models.CharField(primary_key=True, unique=True, max_length=128)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    filename_template = models.CharField(max_length=128, blank=True, null=True)
+    body_template = models.TextField()
