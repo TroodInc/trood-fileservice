@@ -11,7 +11,7 @@ class PDFFileGenerator(TroodBasePlugin):
     version = 'v1.0.0'
 
     default_config = {
-
+        'extension': '.pdf'
     }
 
     @classmethod
