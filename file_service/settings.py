@@ -53,6 +53,8 @@ class BaseConfiguration(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
 
+    FILE_GENERATORS = {}
+
     ROOT_URLCONF = 'file_service.urls'
 
 

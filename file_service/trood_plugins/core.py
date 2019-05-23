@@ -8,10 +8,15 @@ class TroodBasePlugin:
     default_config = {}
 
     @classmethod
-    def get_config(cls):
+    def get_config(cls, key=None):
+        config = cls.default_config
         try:
             plugin_config = TroodPluginModel.objects.get(pk=cls.id)
-            return json.loads(plugin_config.config)
-
+            config = json.loads(plugin_config.config)
         except Exception:
-            return cls.default_config
+            pass
+
+        if key:
+            return config.get(key, None)
+        else:
+            return config

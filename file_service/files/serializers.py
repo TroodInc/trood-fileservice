@@ -150,3 +150,17 @@ class FileTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = files_models.FileType
         fields = ('id', 'mime')
+
+
+class FileTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileTemplate
+        fields = ('id', 'alias', 'name', 'filename_template', 'body_template')
+
+
+class FromTemplateSerializer(serializers.Serializer):
+    data = serializers.JSONField()
+    format = serializers.ChoiceField(choices=settings.FILE_GENERATORS.keys())
+    template = serializers.CharField()
+    access = serializers.ChoiceField(choices=files_models.File.ACCESS_CHOICES)
+    tags = serializers.PrimaryKeyRelatedField(queryset=files_models.Tag.objects.all(), many=True)
