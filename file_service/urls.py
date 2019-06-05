@@ -15,6 +15,7 @@ router = DefaultRouter()
 router.register(r'files', files_views.FilesViewSet)
 router.register(r'extensions', files_views.FileExtensionViewSet)
 router.register(r'types', files_views.FileTypeViewSet)
+router.register(r'templates', files_views.FileTemplateViewSet)
 router.register(r'plugins', TroodPluginsViewSet)
 
 urlpatterns = [

@@ -30,6 +30,12 @@ class FileType(models.Model):
 
 
 class File(models.Model):
+    ACCESS_CHOICES = (
+        ('PRIVATE', _('Private')),
+        ('PROTECTED', _('Protected')),
+        ('PUBLIC', _('Public'))
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.IntegerField(_('Owner'), null=True)
     created = models.DateTimeField(_('Created Date'), auto_now_add=True)
@@ -47,6 +53,8 @@ class File(models.Model):
     deleted = models.BooleanField(_('Deleted'), default=False)
 
     metadata = JSONField(_('Meta data'), null=True, blank=True)
+    tags = models.ManyToManyField('Tag')
+    access = models.CharField(choices=ACCESS_CHOICES, max_length=10, default='PROTECTED')
 
     def __str__(self):
         return self.filename if self.filename else 'No name'
@@ -70,3 +78,14 @@ class File(models.Model):
 
 class FileExtension(models.Model):
     extension = models.CharField(max_length=255)
+
+
+class FileTemplate(models.Model):
+    alias = models.CharField(unique=True, max_length=128, null=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    filename_template = models.CharField(max_length=128, blank=True, null=True)
+    body_template = models.TextField()
+
+
+class Tag(models.Model):
+    tag = models.CharField(unique=True, max_length=128)

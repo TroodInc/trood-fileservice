@@ -1,5 +1,6 @@
 import os
 from configurations import Configuration
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -9,18 +10,21 @@ def rel(*x):
 
 
 class BaseConfiguration(Configuration):
+    # Database
+    # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'fileservice',
-            'USER': 'fileservice',
-            'PASSWORD': 'fileservice',
-            'HOST': 'fileservice_postgres',
-        }
+        'default': dj_database_url.config(
+                default='postgres://fileservice:fileservice@fileservice_postgres/fileservice'
+            )
     }
 
+    # Django environ
+    # DOTENV = os.path.join(BASE_DIR, '.env')
+    
+    # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = '783ae16754d4ce6d1de0a749fb0744f4'
-
+    
+    # FIXME: we must setup that list
     ALLOWED_HOSTS = ['*', ]
 
     INSTALLED_APPS = [
@@ -49,12 +53,16 @@ class BaseConfiguration(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
 
+    FILE_GENERATORS = {}
+
     ROOT_URLCONF = 'file_service.urls'
 
-    TROOD_AUTH_SERVICE_URL = os.environ.get('TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/')
 
+    TROOD_AUTH_SERVICE_URL = os.environ.get(
+        'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
+        )
     SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
-    SERVICE_AUTH_SECRET = os.environ.get("SERVICE_AUTH_SECRET")
+    SERVICE_AUTH_SECRET =  os.environ.get("SERVICE_AUTH_SECRET")
 
     REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -89,7 +97,7 @@ class BaseConfiguration(Configuration):
         ('en-US', 'English'),
     )
 
-    LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en-US')
+    LANGUAGE_CODE =  os.environ.get('LANGUAGE_CODE', 'en-US')
 
     TIME_ZONE = 'UTC'
 
@@ -105,7 +113,7 @@ class BaseConfiguration(Configuration):
     MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
 
     STATIC_URL = '/static/'
-    STATIC_ROOT = os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
+    STATIC_ROOT =  os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
 
     # Absolute url
     FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
@@ -164,14 +172,13 @@ class BaseConfiguration(Configuration):
         },
     }
 
-    RAVEN_CONFIG = {
-        'dsn': 'http://a1574ecfd6bc4c7b921e5b9e00d12f9f:764bf3e753884f2d9eb47cac7242ec80@sentry.dev.trood.ru/5',
-        'release': 'dev'
-    }
+    ENABLE_RAVEN = os.environ.get('ENABLE_RAVEN', "False")
 
-    SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILE")
-    SERVICE_AUTH_SECRET = os.environ.get("SERVICE_AUTH_SECRET")
-
+    if ENABLE_RAVEN == "True":
+        RAVEN_CONFIG = {
+            'dsn': os.environ.get('RAVEN_CONFIG_DSN'),
+            'release': os.environ.get('RAVEN_CONFIG_RELEASE')
+        }
 
 class Development(BaseConfiguration):
     DEBUG = True
