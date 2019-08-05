@@ -89,3 +89,9 @@ class FileTemplate(models.Model):
 
 class Tag(models.Model):
     tag = models.CharField(unique=True, max_length=128)
+
+
+class FileTextContent(models.Model):
+    source = models.ForeignKey(File, on_delete=models.CASCADE)
+    content = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
