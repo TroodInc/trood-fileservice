@@ -44,21 +44,21 @@ class TextExtractorPlugin(TroodBasePlugin):
 class Extrator:
 
     @classmethod
-    def txt(filepath):
+    def txt(cls, filepath):
         with open(filepath, 'r') as input_file:
             text = ' '.join(input_file.readlines())
 
         return text
 
     @classmethod
-    def xml(filepath):
+    def xml(cls, filepath):
         with zipfile.ZipFile(filepath) as doc:
             text = doc.read('word/document.xml').decode()
 
         return text
 
     @classmethod
-    def pdf(filepath):
+    def pdf(cls, filepath):
         resource_manager = PDFResourceManager()
         with io.StringIO() as fake_file_handle:
             with TextConverter(resource_manager, fake_file_handle) as converter:
