@@ -7,5 +7,3 @@ class TroodPluginModel(models.Model):
     version = models.CharField(max_length=32)
     active = models.BooleanField(default=False)
     config = models.TextField()
-
-
