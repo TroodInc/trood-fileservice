@@ -8,4 +8,4 @@ __pycache__
 
 .DS_Store
 
-file_service/local_settings.py
+file_service/local_settings.pydocs/_build
