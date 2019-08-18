@@ -12,7 +12,7 @@ COPY ./manage.py $APPDIR/
 COPY ./requirements.txt $APPDIR/
 COPY ./pytest.ini $APPDIR/
 
-RUN pip install -r $APPDIR/requirements.txt
+RUN pip install -r $APPDIR/requirements.txt --upgrade
 
 EXPOSE 8000
 CMD /usr/local/bin/gunicorn -w 4 -b 0.0.0.0:8000 --reload --access-logfile - file_service.wsgi:application
