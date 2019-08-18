@@ -39,7 +39,7 @@ class BaseConfiguration(Configuration):
         'rest_framework',
 
         'file_service.files',
-        'file_service.trood_plugins',
+        'trood.contrib.django.apps.plugins',
     ]
 
     TROOD_PLUGINS_PATH = 'plugins'
