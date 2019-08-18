@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
-from file_service.trood_plugins.views import TroodPluginsViewSet
+from trood.contrib.django.apps.plugins.views import TroodPluginsViewSet
 from .files import views as files_views
 
 
