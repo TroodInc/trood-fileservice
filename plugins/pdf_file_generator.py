@@ -1,4 +1,4 @@
-from file_service.trood_plugins.core import TroodBasePlugin
+from trood.contrib.django.apps.plugins.core import TroodBasePlugin
 from weasyprint import HTML
 from django.conf import settings
 from django.template import Context
