@@ -57,6 +57,12 @@ class BaseConfiguration(Configuration):
     ROOT_URLCONF = 'file_service.urls'
 
     REST_FRAMEWORK = {
+<<<<<<< HEAD
+=======
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'trood.contrib.django.auth.authentication.TroodTokenAuthentication',
+        ),
+>>>>>>> Imports updated for new SDK
         'DEFAULT_FILTER_BACKENDS': (
             'rest_framework.filters.OrderingFilter',
             'rest_framework.filters.SearchFilter',
