@@ -1,4 +1,4 @@
 REST API
 ========
 
-.. openapi:: swagger.yml
+.. openapi:: _static/swagger.yml
