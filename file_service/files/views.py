@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-from rest_framework.permissions import IsAuthenticated
 
 from file_service.files import models, serializers
 from rest_framework.response import Response
@@ -20,7 +19,6 @@ class FilesViewSet(viewsets.ModelViewSet):
     queryset = models.File.objects.all()
     serializer_class = serializers.FileSerializer
     filter_fields = ('deleted', )
-    permission_classes = (IsAuthenticated, )
 
     @action(detail=True, methods=['PATCH'])
     def metadata(self, request, pk):
@@ -82,16 +80,13 @@ class FilesViewSet(viewsets.ModelViewSet):
 class FileExtensionViewSet(viewsets.ModelViewSet):
     queryset = models.FileExtension.objects.all()
     serializer_class = serializers.FileExtensionSerializer
-    permission_classes = (IsAuthenticated,)
 
 
 class FileTypeViewSet(viewsets.ModelViewSet):
     queryset = models.FileType.objects.all()
     serializer_class = serializers.FileTypeSerializer
-    permission_classes = (IsAuthenticated, )
 
 
 class FileTemplateViewSet(viewsets.ModelViewSet):
     queryset = models.FileTemplate.objects.all()
     serializer_class = serializers.FileTemplateSerializer
-    permission_classes = (IsAuthenticated, )
