@@ -2,7 +2,7 @@ Django==1.11.2
 django-debug-toolbar==1.8
 django-extensions==1.7.9
 django-configurations==2.0
-djangorestframework==3.6.3
+djangorestframework
 psycopg2==2.7.1
 PyJWT==1.5.2
 coverage==4.4.1
@@ -18,7 +18,9 @@ python-slugify==1.2.6
 Pillow==5.3.0
 python-resize-image==1.1.18
 dj_database_url
-WeasyPrint==47
+WeasyPrint
 pdfminer-six
+pyyaml
+uritemplate
 
 git+https://07de0218088728b42ee60f155c71990f1dc6a717:x-oauth-basic@github.com/Q-CIS-DEV/trood-auth-client.git#egg=trood-auth-client

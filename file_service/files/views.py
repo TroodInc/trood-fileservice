@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 
@@ -22,7 +22,7 @@ class FilesViewSet(viewsets.ModelViewSet):
     filter_fields = ('deleted', )
     permission_classes = (IsAuthenticated, )
 
-    @detail_route(methods=['PATCH'])
+    @action(detail=True, methods=['PATCH'])
     def metadata(self, request, pk):
         try:
             file = models.File.objects.get(pk=pk)
@@ -40,7 +40,7 @@ class FilesViewSet(viewsets.ModelViewSet):
         result = serializers.FileSerializer(file).data
         return Response(data=result, status=status.HTTP_200_OK)
 
-    @list_route(methods=['POST'])
+    @action(detail=False, methods=['POST'])
     def from_template(self, request):
         template = request.data.pop("template", None)
         template = get_object_or_404(FileTemplate.objects.all(), alias=template)
