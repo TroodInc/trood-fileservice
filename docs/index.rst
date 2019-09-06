@@ -28,7 +28,9 @@ Upload your first File:
 
 .. code-block:: bash
 
-    curl -X POST 'http://127.0.0.1:8000/api/v1.0/files/' -F 'name=My test file' -F 'file=@./test.jpg'
+    curl -X POST 'http://127.0.0.1:8000/api/v1.0/files/' \
+        -F 'name=My test file' \
+        -F 'file=@./test.jpg'
 
 
 Check other API methods on documentation:
