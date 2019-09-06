@@ -12,6 +12,7 @@ Contents
 --------
 
 .. toctree::
+   :glob:
 
    get-started
    rest-api
