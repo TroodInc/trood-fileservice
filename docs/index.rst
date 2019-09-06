@@ -12,8 +12,10 @@ Contents
 --------
 
 .. toctree::
-    get-started
-    rest-api
+
+   get-started
+   rest-api
+   autoapi/index
 
 Indices and tables
 ==================
