@@ -6,10 +6,11 @@ Files service
 Quickstart
 ----------
 
-Start TroodFiles service container:
+Download and start TroodFiles service container:
 
 .. code-block:: bash
 
+    docker pull registry.tools.trood.ru/files:dev
     docker run -d -p 127.0.0.1:8000:8000/tcp \
         --env DJANGO_CONFIGURATION=Development \
         --env AUTH_TYPE=NONE \
