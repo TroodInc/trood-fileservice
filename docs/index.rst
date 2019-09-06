@@ -15,7 +15,7 @@ Contents
 
    get-started
    rest-api
-   autoapi/index
+   autoapi/*/index
 
 Indices and tables
 ==================
