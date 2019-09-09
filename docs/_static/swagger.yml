@@ -5,20 +5,15 @@ info:
 paths:
   /api/v1.0/files/:
     get:
+      summary: 'Get list of all avaliable files'
+      description: >
+        Returns a list of all files avaliable on fileservice for
+        current user
+        <br>
+        (automatical filtering may be applied while using ABAC)
+      tags:
+        - Files
       operationId: listFiles
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
@@ -26,131 +21,42 @@ paths:
               schema:
                 type: array
                 items:
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                      readOnly: true
-                    owner:
-                      type: integer
-                      maximum: 2147483647
-                      minimum: -2147483648
-                      nullable: true
-                    created:
-                      type: string
-                      format: date-time
-                      readOnly: true
-                    file:
-                      type: string
-                    file_url:
-                      type: string
-                      readOnly: true
-                    filename:
-                      type: string
-                      nullable: true
-                      maxLength: 128
-                    origin_filename:
-                      type: string
-                      nullable: true
-                      maxLength: 128
-                    type:
-                      type: string
-                      readOnly: true
-                    mimetype:
-                      type: string
-                      readOnly: true
-                    size:
-                      type: integer
-                      readOnly: true
-                    ready:
-                      type: boolean
-                    metadata:
-                      type: object
-                      nullable: true
-                  required:
-                  - file
+                  $ref: '#/components/schemas/File'
           description: ''
     post:
+      summary: Upload the file
+      tags:
+          - Files
       operationId: createFile
       parameters: []
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
+              type: object
               properties:
-                owner:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  nullable: true
                 file:
                   type: string
-                filename:
+                  format: binary
+                name:
                   type: string
                   nullable: true
                   maxLength: 128
-                origin_filename:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                ready:
-                  type: boolean
-                metadata:
-                  type: object
-                  nullable: true
               required:
               - file
+              - name
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
+                $ref: '#/components/schemas/File'
           description: ''
   /api/v1.0/files/{id}/:
     get:
+      summary: Get file object
+      tags:
+          - Files
       operationId: retrieveFile
       parameters:
       - name: id
@@ -159,165 +65,17 @@ paths:
         description: A UUID string identifying this file.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
-          description: ''
-    put:
-      operationId: updateFile
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A UUID string identifying this file.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                owner:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  nullable: true
-                file:
-                  type: string
-                filename:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                origin_filename:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                ready:
-                  type: boolean
-                metadata:
-                  type: object
-                  nullable: true
-              required:
-              - file
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
+                $ref: '#/components/schemas/File'
           description: ''
     patch:
+      summary: Update file object
+      tags:
+        - Files
       operationId: partial_updateFile
       parameters:
       - name: id
@@ -326,18 +84,6 @@ paths:
         description: A UUID string identifying this file.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       requestBody:
         content:
           application/json:
@@ -368,51 +114,12 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
+                $ref: '#/components/schemas/File'
           description: ''
     delete:
+      summary: Delete file
+      tags:
+          - Files
       operationId: destroyFile
       parameters:
       - name: id
@@ -421,37 +128,14 @@ paths:
         description: A UUID string identifying this file.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '204':
           description: ''
   /api/v1.0/extensions/:
     get:
+      tags:
+        - File extentions
       operationId: listFileExtensions
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
@@ -470,6 +154,8 @@ paths:
                   - extension
           description: ''
     post:
+      tags:
+          - File extentions
       operationId: createFileExtension
       parameters: []
       requestBody:
@@ -499,6 +185,8 @@ paths:
           description: ''
   /api/v1.0/extensions/{id}/:
     get:
+      tags:
+        - File extentions
       operationId: retrieveFileExtension
       parameters:
       - name: id
@@ -507,64 +195,6 @@ paths:
         description: A unique integer value identifying this file extension.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: integer
-                    readOnly: true
-                  extension:
-                    type: string
-                    maxLength: 255
-                required:
-                - extension
-          description: ''
-    put:
-      operationId: updateFileExtension
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this file extension.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                extension:
-                  type: string
-                  maxLength: 255
-              required:
-              - extension
       responses:
         '200':
           content:
@@ -581,24 +211,14 @@ paths:
                 - extension
           description: ''
     patch:
+      tags:
+        - File extentions
       operationId: partial_updateFileExtension
       parameters:
       - name: id
         in: path
         required: true
         description: A unique integer value identifying this file extension.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
         schema:
           type: string
       requestBody:
@@ -625,6 +245,8 @@ paths:
                 - extension
           description: ''
     delete:
+      tags:
+        - File extentions
       operationId: destroyFileExtension
       parameters:
       - name: id
@@ -633,37 +255,14 @@ paths:
         description: A unique integer value identifying this file extension.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '204':
           description: ''
   /api/v1.0/types/:
     get:
+      tags:
+        - File types
       operationId: listFileTypes
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
@@ -671,17 +270,11 @@ paths:
               schema:
                 type: array
                 items:
-                  properties:
-                    id:
-                      type: string
-                      maxLength: 32
-                    mime:
-                      type: string
-                  required:
-                  - id
-                  - mime
+                  $ref: '#/components/schemas/Type'
           description: ''
     post:
+      tags:
+        - File types
       operationId: createFileType
       parameters: []
       requestBody:
@@ -702,18 +295,12 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 32
-                  mime:
-                    type: string
-                required:
-                - id
-                - mime
+                $ref: '#/components/schemas/Type'
           description: ''
   /api/v1.0/types/{id}/:
     get:
+      tags:
+        - File types
       operationId: retrieveFileType
       parameters:
       - name: id
@@ -722,83 +309,16 @@ paths:
         description: A unique value identifying this file type.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 32
-                  mime:
-                    type: string
-                required:
-                - id
-                - mime
-          description: ''
-    put:
-      operationId: updateFileType
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique value identifying this file type.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                id:
-                  type: string
-                  maxLength: 32
-                mime:
-                  type: string
-              required:
-              - id
-              - mime
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 32
-                  mime:
-                    type: string
-                required:
-                - id
-                - mime
+                $ref: '#/components/schemas/Type'
           description: ''
     patch:
+      tags:
+        - File types
       operationId: partial_updateFileType
       parameters:
       - name: id
@@ -807,18 +327,6 @@ paths:
         description: A unique value identifying this file type.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       requestBody:
         content:
           application/json:
@@ -834,17 +342,11 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 32
-                  mime:
-                    type: string
-                required:
-                - id
-                - mime
+                $ref: '#/components/schemas/Type'
           description: ''
     delete:
+      tags:
+        - File types
       operationId: destroyFileType
       parameters:
       - name: id
@@ -853,37 +355,15 @@ paths:
         description: A unique value identifying this file type.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '204':
           description: ''
   /api/v1.0/templates/:
     get:
+      summary: List all avaliable file templates
+      tags:
+        - Templates
       operationId: listFileTemplates
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
@@ -913,6 +393,9 @@ paths:
                   - body_template
           description: ''
     post:
+      summary: Create new file template
+      tags:
+          - Templates
       operationId: createFileTemplate
       parameters: []
       requestBody:
@@ -964,6 +447,8 @@ paths:
           description: ''
   /api/v1.0/templates/{id}/:
     get:
+      tags:
+        - Templates
       operationId: retrieveFileTemplate
       parameters:
       - name: id
@@ -972,86 +457,6 @@ paths:
         description: A unique integer value identifying this file template.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: integer
-                    readOnly: true
-                  alias:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  name:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  filename_template:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  body_template:
-                    type: string
-                required:
-                - body_template
-          description: ''
-    put:
-      operationId: updateFileTemplate
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this file template.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                alias:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                name:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                filename_template:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                body_template:
-                  type: string
-              required:
-              - body_template
       responses:
         '200':
           content:
@@ -1079,24 +484,14 @@ paths:
                 - body_template
           description: ''
     patch:
+      tags:
+        - Templates
       operationId: partial_updateFileTemplate
       parameters:
       - name: id
         in: path
         required: true
         description: A unique integer value identifying this file template.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
         schema:
           type: string
       requestBody:
@@ -1145,6 +540,8 @@ paths:
                 - body_template
           description: ''
     delete:
+      tags:
+        - Templates
       operationId: destroyFileTemplate
       parameters:
       - name: id
@@ -1153,37 +550,15 @@ paths:
         description: A unique integer value identifying this file template.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '204':
           description: ''
   /api/v1.0/plugins/:
     get:
+      summary: List all plugins installed
+      tags:
+        - Plugins
       operationId: listTroodPluginModels
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       responses:
         '200':
           content:
@@ -1209,55 +584,11 @@ paths:
                   - version
                   - config
           description: ''
-    post:
-      operationId: createTroodPluginModel
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                id:
-                  type: string
-                  maxLength: 128
-                name:
-                  type: string
-                  maxLength: 128
-                version:
-                  type: string
-                  maxLength: 32
-                config:
-                  type: string
-              required:
-              - id
-              - name
-              - version
-              - config
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 128
-                  name:
-                    type: string
-                    maxLength: 128
-                  version:
-                    type: string
-                    maxLength: 32
-                  config:
-                    type: string
-                required:
-                - id
-                - name
-                - version
-                - config
-          description: ''
   /api/v1.0/plugins/{id}/:
     get:
+      summary: Get plugin settings
+      tags:
+        - Plugins
       operationId: retrieveTroodPluginModel
       parameters:
       - name: id
@@ -1266,83 +597,6 @@ paths:
         description: A unique value identifying this trood plugin model.
         schema:
           type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    maxLength: 128
-                  name:
-                    type: string
-                    maxLength: 128
-                  version:
-                    type: string
-                    maxLength: 32
-                  config:
-                    type: string
-                required:
-                - id
-                - name
-                - version
-                - config
-          description: ''
-    put:
-      operationId: updateTroodPluginModel
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique value identifying this trood plugin model.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                id:
-                  type: string
-                  maxLength: 128
-                name:
-                  type: string
-                  maxLength: 128
-                version:
-                  type: string
-                  maxLength: 32
-                config:
-                  type: string
-              required:
-              - id
-              - name
-              - version
-              - config
       responses:
         '200':
           content:
@@ -1367,24 +621,15 @@ paths:
                 - config
           description: ''
     patch:
+      summary: Update plugin settings
+      tags:
+        - Plugins
       operationId: partial_updateTroodPluginModel
       parameters:
       - name: id
         in: path
         required: true
         description: A unique value identifying this trood plugin model.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
         schema:
           type: string
       requestBody:
@@ -1426,32 +671,11 @@ paths:
                 - version
                 - config
           description: ''
-    delete:
-      operationId: destroyTroodPluginModel
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique value identifying this trood plugin model.
-        schema:
-          type: string
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      responses:
-        '204':
-          description: ''
   /api/v1.0/files/from_template/:
     post:
+      summary: Create new file from template
+      tags:
+        - Files
       operationId: from_templateFile
       parameters: []
       requestBody:
@@ -1486,131 +710,59 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
+                $ref: '#/components/schemas/File'
           description: ''
-  /api/v1.0/files/{id}/metadata/:
-    patch:
-      operationId: metadataFile
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A UUID string identifying this file.
-        schema:
+
+components:
+  schemas:
+    File:
+      type: object
+      properties:
+        id:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                owner:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  nullable: true
-                file:
-                  type: string
-                filename:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                origin_filename:
-                  type: string
-                  nullable: true
-                  maxLength: 128
-                ready:
-                  type: boolean
-                metadata:
-                  type: object
-                  nullable: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  owner:
-                    type: integer
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    nullable: true
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  file:
-                    type: string
-                  file_url:
-                    type: string
-                    readOnly: true
-                  filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  origin_filename:
-                    type: string
-                    nullable: true
-                    maxLength: 128
-                  type:
-                    type: string
-                    readOnly: true
-                  mimetype:
-                    type: string
-                    readOnly: true
-                  size:
-                    type: integer
-                    readOnly: true
-                  ready:
-                    type: boolean
-                  metadata:
-                    type: object
-                    nullable: true
-                required:
-                - file
-          description: ''
+          format: uuid
+          readOnly: true
+        owner:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        file:
+          type: string
+        file_url:
+          type: string
+          readOnly: true
+        filename:
+          type: string
+          nullable: true
+          maxLength: 128
+        origin_filename:
+          type: string
+          nullable: true
+          maxLength: 128
+        type:
+          type: string
+          readOnly: true
+        mimetype:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        ready:
+          type: boolean
+        metadata:
+          type: object
+          nullable: true
+    Type:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 32
+        mime:
+          type: string
