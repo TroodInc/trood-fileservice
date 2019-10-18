@@ -9,6 +9,7 @@ coverage==4.4.1
 Sphinx==1.6.2
 python-magic==0.4.13
 pytest==3.4.2
+attrs==19.1.0
 pytest-django==3.1.2
 pytest-cov==2.6.0
 gunicorn==19.7.1
