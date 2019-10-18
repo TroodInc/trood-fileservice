@@ -22,4 +22,5 @@ class PNGFileGenerator(TroodBasePlugin):
     def create(cls, template_string, data):
         template = DjangoTemplate(template_string)
         document = HTML(string=template.render(Context(data))).render()
-        return document.write_png()
+        file_data, w, h = document.write_png()
+        return file_data
