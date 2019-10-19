@@ -7,7 +7,7 @@ from resizeimage import resizeimage
 from file_service.files.models import File
 from django.db.models import signals
 
-from file_service.trood_plugins.core import TroodBasePlugin
+from trood.contrib.django.apps.plugins.core import TroodBasePlugin
 
 
 class ImageResizePlugin(TroodBasePlugin):

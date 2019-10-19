@@ -2,7 +2,6 @@ import io
 import re
 import zipfile
 
-from django.conf import settings
 from django.db.models import signals
 
 from pdfminer.converter import TextConverter
@@ -10,7 +9,7 @@ from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 
 from file_service.files.models import File
-from file_service.trood_plugins.core import TroodBasePlugin
+from trood.contrib.django.apps.plugins.core import TroodBasePlugin
 
 
 class TextExtractorPlugin(TroodBasePlugin):

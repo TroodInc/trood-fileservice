@@ -1,1 +1,0 @@
-default_app_config = 'file_service.trood_plugins.apps.TroodPluginsConfig'
