@@ -4,6 +4,7 @@ from uuid import uuid4
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework import serializers
+from rest_framework.fields import JSONField
 
 from file_service.files import models as files_models
 
@@ -140,9 +141,11 @@ class FileTypeSerializer(serializers.ModelSerializer):
 
 
 class FileTemplateSerializer(serializers.ModelSerializer):
+    example_data = serializers.JSONField(required=False)
+
     class Meta:
         model = files_models.FileTemplate
-        fields = ('id', 'alias', 'name', 'filename_template', 'body_template')
+        fields = ('id', 'alias', 'name', 'filename_template', 'body_template', 'example_data')
 
 
 class FromTemplateSerializer(serializers.Serializer):

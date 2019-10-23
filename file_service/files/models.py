@@ -5,7 +5,7 @@ import mimetypes
 
 from slugify import slugify
 from datetime import datetime
-from django.contrib.postgres.fields.jsonb import JSONField
+from jsonfield import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ValidationError
@@ -84,6 +84,7 @@ class FileTemplate(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     filename_template = models.CharField(max_length=128, blank=True, null=True)
     body_template = models.TextField()
+    example_data = JSONField(null=True)
 
 
 class Tag(models.Model):
