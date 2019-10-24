@@ -4,6 +4,7 @@ from uuid import uuid4
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework import serializers
+from rest_framework.fields import JSONField
 
 from file_service.files import models as files_models
 
@@ -16,76 +17,9 @@ def move_uploaded_file(file, name=str(uuid4())):
     return file_path
 
 
-class MessageMetaDataSerializer(serializers.Serializer):
-    message = serializers.CharField(required=False)
-
-    class Meta:
-        fields = ('message', )
-
-    def save(self, *args, **kwargs):
-        self.instance.ready = False
-        self.instance.metadata = {
-            'message': self.validated_data['message']
-        }
-
-        self.instance.save()
-        return self.instance
-
-
-class AudioMetaDataSerializer(serializers.Serializer):
-    mp3 = serializers.FileField()
-    length = serializers.IntegerField()
-
-    def save(self, *args, **kwargs):
-        self.instance.ready = True
-        file_path = move_uploaded_file(self.validated_data['mp3'])
-        self.instance.metadata = {
-            'length': self.validated_data['length'],
-            'mp3': file_path
-        }
-
-        self.instance.save()
-        return self.instance
-
-    def to_representation(self, instance):
-        result = super(AudioMetaDataSerializer, self).to_representation(instance)
-        result['mp3'] = settings.FILES_BASE_URL + instance['mp3']
-        return result
-
-
-class ImageMetaDataSerializer(serializers.Serializer):
-    small = serializers.FileField()
-    medium = serializers.FileField()
-    large = serializers.FileField()
-    xlarge = serializers.FileField()
-
-    def save(self, *args, **kwargs):
-        self.instance.ready = True
-        thumbs = self.validated_data
-        file_id = self.instance.id
-        self.instance.metadata = {
-            'small': move_uploaded_file(thumbs['small'], f'{file_id}_small'),
-            'medium': move_uploaded_file(thumbs['medium'], f'{file_id}_medium'),
-            'large': move_uploaded_file(thumbs['large'], f'{file_id}_large'),
-            'xlarge': move_uploaded_file(thumbs['xlarge'], f'{file_id}_xlarge'),
-        }
-
-        self.instance.save()
-        return self.instance
-
-    def to_representation(self, instance):
-        result = {k: settings.FILES_BASE_URL + v for k, v in instance.items()}
-        return result
-
-
 class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
-
-    metadata_serializers = {
-        # @todo: autoload custom serrializers
-        "AUDIO": AudioMetaDataSerializer,
-        "IMAGE": ImageMetaDataSerializer
-    }
+    metadata = serializers.JSONField(required=False)
 
     class Meta:
         model = files_models.File
@@ -101,7 +35,7 @@ class FileSerializer(serializers.ModelSerializer):
         return settings.FILES_BASE_URL + obj.file.name
 
     def to_internal_value(self, data):
-        if 'file' in data or data.get('filename', '') == '':
+        if 'file' in data and data.get('filename', '') == '':
             data.update({
                 'filename': data['file'].name,
                 'origin_filename': data['file'].name
@@ -111,10 +45,6 @@ class FileSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         result = super(FileSerializer, self).to_representation(instance)
-        serializer = self.metadata_serializers.get(instance.type, None)
-        if serializer and instance.ready:
-            serializer = serializer(instance=instance.metadata)
-            result['metadata'] = serializer.data
 
         result.pop('file')
         return result
@@ -140,9 +70,11 @@ class FileTypeSerializer(serializers.ModelSerializer):
 
 
 class FileTemplateSerializer(serializers.ModelSerializer):
+    example_data = serializers.JSONField(required=False)
+
     class Meta:
         model = files_models.FileTemplate
-        fields = ('id', 'alias', 'name', 'filename_template', 'body_template')
+        fields = ('id', 'alias', 'name', 'filename_template', 'body_template', 'example_data')
 
 
 class FromTemplateSerializer(serializers.Serializer):

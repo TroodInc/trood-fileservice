@@ -107,35 +107,10 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'mp3': create_temp_file('.mp3'),
-            'length': 3123,
-            'ready': True
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
+        data = {"metadata": {'length': 3123}, 'ready': True}
+        response = self.client.patch(url, data=data, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], True)
-
-    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-    def test_update_image_file_metadata(self):
-        url = reverse('api:file-list', )
-        file_data = {'file': create_temp_file('.jpg', data=jpg_file_data), 'name': 'myfile'}
-        response = self.client.post(url, data=file_data, format='multipart')
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'small': create_temp_file('.jpg'),
-            'medium': create_temp_file('.jpg'),
-            'large': create_temp_file('.jpg'),
-            'xlarge': create_temp_file('.jpg'),
-            'ready': True
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
-        self.assertEquals(response.data['ready'], True)
-        self.assertIsNotNone(response.data['metadata'])
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata_with_error_message(self):
@@ -146,11 +121,9 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'message':  'Error something goes wrong',
-            'ready': False
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
+        data = {"metadata": {'message':  'Error something goes wrong'}, 'ready': False}
+        response = self.client.patch(url, data=data, format="json")
+        print(response.content)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], False)
         self.assertEqual(response.data['metadata']['message'], 'Error something goes wrong')
