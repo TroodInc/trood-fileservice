@@ -386,6 +386,85 @@ paths:
               schema:
                 $ref: '#/components/schemas/Template'
           description: 'Template object created'
+  /api/v1.0/templates/preview:
+    post:
+      summary: Preview template rendering without save
+      tags:
+        - Templates
+      operationId: previewFileTemplate
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                alias:
+                  type: string
+                  nullable: true
+                  maxLength: 128
+                name:
+                  type: string
+                  nullable: true
+                  maxLength: 128
+                filename_template:
+                  type: string
+                  nullable: true
+                  maxLength: 128
+                body_template:
+                  type: string
+                example_data:
+                  type: object
+                format:
+                  type: string
+                  enum:
+                    - PNG
+                    - PDF
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+          description: 'Template object'
+  /api/v1.0/templates/{id}/render:
+    post:
+      summary: Render template to file
+      tags:
+        - Templates
+      operationId: renderFileTemplate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this file template.
+        schema:
+          type: string
+      - name: preview
+        in: query
+        description: Flag for previewing template with example data
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  type: object
+                  nullable: true
+                  maxLength: 128
+                format:
+                  type: string
+                  enum:
+                    - PNG
+                    - PDF
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+          description: 'Template object'
   /api/v1.0/templates/{id}/:
     get:
       summary: Get template object
@@ -583,6 +662,7 @@ paths:
           description: ''
   /api/v1.0/files/from_template/:
     post:
+      deprecated: true
       summary: Create new file from template
       tags:
         - Files
@@ -705,3 +785,5 @@ components:
           maxLength: 128
         body_template:
           type: string
+        example_data:
+          type: object
