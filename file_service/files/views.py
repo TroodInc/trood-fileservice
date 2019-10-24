@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
@@ -47,7 +46,13 @@ class FilesViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'])
     def from_template(self, request):
         template = request.data.pop("template", None)
-        template = get_object_or_404(models.FileTemplate.objects.all(), alias=template)
+
+        if template is None:
+            return Response(data={"status": "ERROR", "message": "Empty template field"}, status=status.HTTP_400_BAD_REQUEST)
+        elif isinstance(template, str):
+            template = get_object_or_404(models.FileTemplate.objects.all(), alias=template)
+        elif isinstance(template, dict):
+            template = models.FileTemplate(**template)
 
         file_format = request.data.pop("format", None)
         data = request.data.pop("data", None)
