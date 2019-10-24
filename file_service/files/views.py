@@ -44,24 +44,6 @@ class FilesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.FileSerializer
     filter_fields = ('deleted', )
 
-    @action(detail=True, methods=['PATCH'])
-    def metadata(self, request, pk):
-        try:
-            file = models.File.objects.get(pk=pk)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if not request.data.get('ready', False) in ['true', 'True', True]:
-            serializer = serializers.MessageMetaDataSerializer(instance=file, data=request.data)
-        else:
-            serializer = serializers.FileSerializer.metadata_serializers.get(file.type.id)(instance=file, data=request.data)
-
-        serializer.is_valid(raise_exception=True)
-        file = serializer.save()
-
-        result = serializers.FileSerializer(file).data
-        return Response(data=result, status=status.HTTP_200_OK)
-
     @action(detail=False, methods=['POST'])
     def from_template(self, request):
         template = request.data.pop("template", None)
