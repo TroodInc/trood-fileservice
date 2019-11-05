@@ -8,9 +8,15 @@ General settings
 
     Service database connection URL
 
+
+.. envvar:: AUTHENTICATION_TYPE
+
+    Authentication type can be ``NONE`` or ``TROOD``
+
+
 .. envvar:: SERVICE_DOMAIN
 
-    Service identification used in TroodCore ecosystem, default ``AUTHORIZATION``
+    Service identification used in TroodCore ecosystem, default ``FILESERVICE``
 
 
 .. envvar:: SERVICE_AUTH_SECRET
