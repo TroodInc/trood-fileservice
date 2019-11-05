@@ -116,8 +116,6 @@ class BaseConfiguration(Configuration):
         'xlarge': 1200
     }
 
-    DOMAIN = 'FILESERVICE'
-
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': True,
@@ -180,7 +178,7 @@ class BaseConfiguration(Configuration):
         SERVICE_AUTH_SECRET = os.environ.get("SERVICE_AUTH_SECRET")
 
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = (
-           'trood_auth_client.authentication.TroodTokenAuthentication',
+           'trood.contrib.django.auth.authentication.TroodTokenAuthentication',
         )
 
         REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = (
