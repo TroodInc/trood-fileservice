@@ -49,6 +49,6 @@ Contents
    :maxdepth: 2
    :glob:
 
-   get-started
+   config
    rest-api
    autoapi/index
