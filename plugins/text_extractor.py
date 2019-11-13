@@ -1,14 +1,10 @@
 import io
 import re
-import zipfile
 
+import textract
 from django.db.models import signals
 
-from pdfminer.converter import TextConverter
-from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
-from pdfminer.pdfpage import PDFPage
-
-from file_service.files.models import File
+from file_service.files.models import File, FileTextContent
 from trood.contrib.django.apps.plugins.core import TroodBasePlugin
 
 
@@ -19,7 +15,32 @@ class TextExtractorPlugin(TroodBasePlugin):
 
     default_config = {
         'async': False,
-        'types': ['TXT']
+        'extractable_mimetypes': [
+            "application/pdf", "text/plain", "text/rtf", "application/rtf",
+            "application/x-rtf", "text/csv", "application/msword",
+            "text/richtext",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+            "application/vnd.ms-word.document.macroEnabled.12",
+            "application/vnd.ms-word.template.macroEnabled.12", "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.template", 
+            "application/vnd.ms-excel.sheet.macroEnabled.12",
+            "application/vnd.ms-excel.template.macroEnabled.12",
+            "application/vnd.ms-excel.addin.macroEnabled.12",
+            "application/vnd.ms-excel.sheet.binary.macroEnabled.12",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.openxmlformats-officedocument.presentationml.template",
+            "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+            "application/vnd.ms-powerpoint.addin.macroEnabled.12", 
+            "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+            "application/vnd.ms-powerpoint.template.macroEnabled.12",
+            "application/vnd.ms-powerpoint.slideshow.macroEnabled.12", 
+            "application/vnd.oasis.opendocument.spreadsheet", 
+            "application/vnd.oasis.opendocument.text",
+            "application/vnd.oasis.opendocument.presentation"
+            ]
     }
 
     @classmethod
@@ -27,45 +48,13 @@ class TextExtractorPlugin(TroodBasePlugin):
         signals.post_save.connect(cls.extract, File)
 
     @classmethod
-    def extract(cls, sender, instance, **kwargs):
+    def extract(cls, sender, **kwargs):
+        file = kwargs.get('instance')
         config = cls.get_config()
-        if instance.type_id in config['types']:
-            extractor = cls.get_extractor(instance.type_id)
-            raw_text = extractor(instance.file.filepath)
+        if file.mimetype in config['extractable_mimetypes']:
+            filepath = file.file.path
+            b_text = textract.process(filepath)
+            raw_text = b_text.decode("utf-8")
             text = re.sub(r'\s+', ' ', re.sub(r'<[^<]+>', ' ', raw_text))
-            FileTextContent.objects.create(source=instance, content=text)
+            FileTextContent.objects.create(source=file, content=text)
 
-    @classmethod
-    def get_extractor(cls, type_id):
-        return getattr(Extractor, instance.type_id)
-
-
-class Extrator:
-
-    @classmethod
-    def txt(cls, filepath):
-        with open(filepath, 'r') as input_file:
-            text = ' '.join(input_file.readlines())
-
-        return text
-
-    @classmethod
-    def xml(cls, filepath):
-        with zipfile.ZipFile(filepath) as doc:
-            text = doc.read('word/document.xml').decode()
-
-        return text
-
-    @classmethod
-    def pdf(cls, filepath):
-        resource_manager = PDFResourceManager()
-        with io.StringIO() as fake_file_handle:
-            with TextConverter(resource_manager, fake_file_handle) as converter:
-                page_interpreter = PDFPageInterpreter(resource_manager, converter)
-                with open(filepath, 'rb') as pdf:
-                    pages = PDFPage.get_pages(pdf, caching=True, check_extractable=True)
-                    [page_interpreter.process_page(p) for p in pages]
-                
-            text = fake_file_handle.getvalue()
-
-        return text
