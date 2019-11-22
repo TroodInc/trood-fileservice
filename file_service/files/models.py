@@ -95,3 +95,5 @@ class FileTextContent(models.Model):
     source = models.ForeignKey(File, on_delete=models.CASCADE)
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
+    title = models.TextField(null=True)
+
