@@ -54,7 +54,8 @@ class TextExtractorPlugin(TroodBasePlugin):
         if file.mimetype in config['extractable_mimetypes']:
             filepath = file.file.path
             b_text = textract.process(filepath)
+            title = file.origin_filename.split('.')[0]
             raw_text = b_text.decode("utf-8")
             text = re.sub(r'\s+', ' ', re.sub(r'<[^<]+>', ' ', raw_text))
-            FileTextContent.objects.create(source=file, content=text)
+            FileTextContent.objects.create(source=file, content=text, title=title)
 
