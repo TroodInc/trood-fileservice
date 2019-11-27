@@ -13,6 +13,8 @@ COPY ./requirements.txt $APPDIR/
 COPY ./pytest.ini $APPDIR/
 COPY ./docs/_static/swagger.yml $APPDIR/static/
 
+RUN apt-get update -y && \
+    apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr libjpeg-dev swig 
 RUN pip install -r $APPDIR/requirements.txt --upgrade
 
 EXPOSE 8000
