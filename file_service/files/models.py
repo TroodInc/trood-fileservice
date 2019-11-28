@@ -5,7 +5,7 @@ import mimetypes
 
 from slugify import slugify
 from datetime import datetime
-from django.contrib.postgres.fields.jsonb import JSONField
+from jsonfield import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ValidationError
@@ -18,9 +18,8 @@ def create_unique_filename(instance, filename):
 
 def validate_file_extention(value):
     ext = value.name.split('.')[-1]
-    allowed_extensions = FileExtension.objects.all().values_list('extension',
-                                                                 flat=True)
-    if not ext.lower() in allowed_extensions and "*" not in allowed_extensions:
+    allowed_extensions = FileExtension.objects.all().values_list('extension', flat=True)
+    if len(allowed_extensions) and not ext.lower() in allowed_extensions and "*" not in allowed_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 
@@ -85,7 +84,16 @@ class FileTemplate(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     filename_template = models.CharField(max_length=128, blank=True, null=True)
     body_template = models.TextField()
+    example_data = JSONField(null=True)
 
 
 class Tag(models.Model):
     tag = models.CharField(unique=True, max_length=128)
+
+
+class FileTextContent(models.Model):
+    source = models.ForeignKey(File, on_delete=models.CASCADE)
+    content = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    title = models.TextField(null=True)
+

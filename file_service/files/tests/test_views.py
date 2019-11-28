@@ -2,15 +2,13 @@ import base64
 import os
 import tempfile
 
-from django.conf import settings
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
 
-from file_service.files import models as file_models
 from file_service.files.models import FileExtension, FileType
-from trood_auth_client.authentication import TroodUser
+from trood.contrib.django.auth.authentication import TroodUser
 
 aac_file_data = "//FQgCi//N4CAExhdmM1Ny44OS4xMDAAQjYf///8MACPslW0kC0TE0TC0LBc31HLWWcVF1U1lqfcrWhzJUSt2Otf//IYZnBrSL7MwvbLX0D7XXMXU/6889ow33jjGYuyV8DO0nBtk9c2PnoELJsgeAkY+fYUb+W+Z2VJm7GwZsGZhuwRMN0iJhmwHYDmI+cr8AnEr5QZEm6ZunYlff0lYLcP84ORJpErmITIWXe1mLinxBzo8CzywwCxMuhLgGBsByI+0lnLYppx5jYceouxDYbOAgIXKMkQZ7BUJYUFB6Jafrl479u6gJcuzSty3MCwEZ2zgU8py5GS5ZkWWZZ2pAz9kud1731ZZRAQFkmzPLsuOyqfMJZ8z8fnTLHjrSCLReHQ+LReLQ+FzfUctZZxUXVTWWp9ytaDDQ2AAAAAAAAAAAAAcP/xUIAqf/whGw////2NAEdYqvoaFo4FoYDooHo6C741Rz045vjLzVFpT8uEmRVUnneQP3Ow9Z7R/vKzf+V48TzVvGcz89SbrruJvu4+kge3N1C+Viqn6rvOF+9+9+B46+Q0jicTx20j8DjTPHazkaVLGsWuc1muvsDlM7GmVIs7OqWMbI2EXI5TicTOxrztMK82HI1mu41Nf8dynjtZrthyONYzuRxuY//uUWoA0la2WNyONambK+0ONyPWazZbDibDGqWM7O7Wbwdy8/sYv5fuho8Hiw4oQ3NqOpZqamaiyuizRZCEkNGaFGa7S7klkJKM0NSSdkhPFcSKi8iaS8jUzQ5N4ZoaklGpqZpqM1mpJcFGpMdGuvuRpG9xKMvOUqZ2djZHExw50Ii0Yi0Ih0Xi0nhd8ao56cc3xl5qi0p+XCTIqjWt4AAAAAAAAAAAAAAADg=="
 jpg_file_data = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q=="
@@ -109,35 +107,10 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'mp3': create_temp_file('.mp3'),
-            'length': 3123,
-            'ready': True
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
+        data = {"metadata": {'length': 3123}, 'ready': True}
+        response = self.client.patch(url, data=data, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], True)
-
-    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-    def test_update_image_file_metadata(self):
-        url = reverse('api:file-list', )
-        file_data = {'file': create_temp_file('.jpg', data=jpg_file_data), 'name': 'myfile'}
-        response = self.client.post(url, data=file_data, format='multipart')
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'small': create_temp_file('.jpg'),
-            'medium': create_temp_file('.jpg'),
-            'large': create_temp_file('.jpg'),
-            'xlarge': create_temp_file('.jpg'),
-            'ready': True
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
-        self.assertEquals(response.data['ready'], True)
-        self.assertIsNotNone(response.data['metadata'])
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata_with_error_message(self):
@@ -148,11 +121,9 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        meta_data = {
-            'message':  'Error something goes wrong',
-            'ready': False
-        }
-        response = self.client.patch(url + 'metadata/', data=meta_data, format='multipart')
+        data = {"metadata": {'message':  'Error something goes wrong'}, 'ready': False}
+        response = self.client.patch(url, data=data, format="json")
+        print(response.content)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], False)
         self.assertEqual(response.data['metadata']['message'], 'Error something goes wrong')

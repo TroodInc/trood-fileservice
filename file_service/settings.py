@@ -14,8 +14,8 @@ class BaseConfiguration(Configuration):
     # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
     DATABASES = {
         'default': dj_database_url.config(
-                default='postgres://fileservice:fileservice@fileservice_postgres/fileservice'
-            )
+            default='postgres://fileservice:fileservice@fileservice_postgres/fileservice'
+        )
     }
 
     # Django environ
@@ -28,7 +28,6 @@ class BaseConfiguration(Configuration):
     ALLOWED_HOSTS = ['*', ]
 
     INSTALLED_APPS = [
-        'django.contrib.admin',
 
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -39,7 +38,7 @@ class BaseConfiguration(Configuration):
         'rest_framework',
 
         'file_service.files',
-        'file_service.trood_plugins',
+        'trood.contrib.django.apps.plugins',
     ]
 
     TROOD_PLUGINS_PATH = 'plugins'
@@ -57,17 +56,7 @@ class BaseConfiguration(Configuration):
 
     ROOT_URLCONF = 'file_service.urls'
 
-
-    TROOD_AUTH_SERVICE_URL = os.environ.get(
-        'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
-        )
-    SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
-    SERVICE_AUTH_SECRET =  os.environ.get("SERVICE_AUTH_SECRET")
-
     REST_FRAMEWORK = {
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'trood_auth_client.authentication.TroodTokenAuthentication',
-        ),
         'DEFAULT_FILTER_BACKENDS': (
             'rest_framework.filters.OrderingFilter',
             'rest_framework.filters.SearchFilter',
@@ -77,6 +66,7 @@ class BaseConfiguration(Configuration):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': ['file_service/templates'],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -97,7 +87,7 @@ class BaseConfiguration(Configuration):
         ('en-US', 'English'),
     )
 
-    LANGUAGE_CODE =  os.environ.get('LANGUAGE_CODE', 'en-US')
+    LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en-US')
 
     TIME_ZONE = 'UTC'
 
@@ -113,7 +103,7 @@ class BaseConfiguration(Configuration):
     MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
 
     STATIC_URL = '/static/'
-    STATIC_ROOT =  os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
+    STATIC_ROOT = os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
 
     # Absolute url
     FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
@@ -125,8 +115,6 @@ class BaseConfiguration(Configuration):
         'large': 640,
         'xlarge': 1200
     }
-
-    DOMAIN = 'FILESERVICE'
 
     LOGGING = {
         'version': 1,
@@ -180,8 +168,34 @@ class BaseConfiguration(Configuration):
             'release': os.environ.get('RAVEN_CONFIG_RELEASE')
         }
 
+    AUTH_TYPE = os.environ.get('AUTHENTICATION_TYPE')
+
+    if AUTH_TYPE == 'TROOD':
+        TROOD_AUTH_SERVICE_URL = os.environ.get(
+            'TROOD_AUTH_SERVICE_URL', 'http://authorization.trood:8000/'
+        )
+        SERVICE_DOMAIN = os.environ.get("SERVICE_DOMAIN", "FILESERVICE")
+        SERVICE_AUTH_SECRET = os.environ.get("SERVICE_AUTH_SECRET")
+
+        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = (
+           'trood.contrib.django.auth.authentication.TroodTokenAuthentication',
+        )
+
+        REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = (
+            'rest_framework.permissions.IsAuthenticated',
+        )
+
+    elif AUTH_TYPE == 'NONE':
+        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = ()
+        REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ()
+
+
 class Development(BaseConfiguration):
     DEBUG = True
+
+    INSTALLED_APPS = BaseConfiguration.INSTALLED_APPS + [
+        'django.contrib.admin'
+    ]
 
 
 class Production(BaseConfiguration):
