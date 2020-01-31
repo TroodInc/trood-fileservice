@@ -60,7 +60,8 @@ class BaseConfiguration(Configuration):
         'DEFAULT_FILTER_BACKENDS': (
             'rest_framework.filters.OrderingFilter',
             'rest_framework.filters.SearchFilter',
-        )
+        ),
+        'DEFAULT_PAGINATION_CLASS': 'trood.contrib.django.pagination.TroodRQLPagination',
     }
 
     TEMPLATES = [
