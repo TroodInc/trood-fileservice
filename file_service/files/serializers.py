@@ -20,6 +20,7 @@ def move_uploaded_file(file, name=str(uuid4())):
 class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     metadata = serializers.JSONField(required=False)
+    # deleted = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         model = files_models.File
@@ -27,7 +28,8 @@ class FileSerializer(serializers.ModelSerializer):
             'id', 'owner', 'created', 'file',
             'file_url', 'filename', 'origin_filename',
             'type', 'mimetype', 'size',
-            'ready', 'metadata'
+            'ready', 'metadata',
+            # 'deleted'
         )
         read_only_fields = ('created', 'id', 'type', 'mimetype', 'size', 'file_url', )
 
