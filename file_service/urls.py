@@ -20,7 +20,7 @@ router.register(r'templates', files_views.FileTemplateViewSet)
 router.register(r'plugins', TroodPluginsViewSet)
 
 urlpatterns = [
-    url(r'^api/v1.0/', include(router.urls, namespace='api')),
+    url(r'^api/v1.0/', include((router.urls, 'file_service'), namespace='api')),
 ]
 
 if settings.DEBUG:
