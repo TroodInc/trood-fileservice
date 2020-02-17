@@ -109,7 +109,7 @@ class FilesBehaviourTestCase(APITestCase):
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
         data = {"metadata": {'length': 3123}, 'ready': True}
         response = self.client.patch(url, data=data, format='json')
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], True)
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
@@ -124,7 +124,7 @@ class FilesBehaviourTestCase(APITestCase):
         data = {"metadata": {'message':  'Error something goes wrong'}, 'ready': False}
         response = self.client.patch(url, data=data, format="json")
         print(response.content)
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], False)
         self.assertEqual(response.data['metadata']['message'], 'Error something goes wrong')
 
