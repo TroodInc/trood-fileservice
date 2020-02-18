@@ -195,10 +195,6 @@ class BaseConfiguration(Configuration):
 class Development(BaseConfiguration):
     DEBUG = True
 
-    INSTALLED_APPS = BaseConfiguration.INSTALLED_APPS + [
-        'django.contrib.admin'
-    ]
-
 
 class Production(BaseConfiguration):
     DEBUG = False
