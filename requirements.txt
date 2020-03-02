@@ -24,5 +24,8 @@ PyYAML==5.3
 uritemplate==3.0.1
 jsonfield==3.0.0
 textract==1.6.3
+docx==0.2.4
+cssutils==1.0.2
+python-docx==0.8.10
 
 git+https://07de0218088728b42ee60f155c71990f1dc6a717:x-oauth-basic@github.com/Q-CIS-DEV/trood-sdk.git#egg=trood
