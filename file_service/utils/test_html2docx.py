@@ -1,7 +1,9 @@
-from html2docx import BaseStyleProcesser, TableCreator, TableDrawer
+from html2docx import BaseStyleHandler, TableCreator, TableDrawer
 from docx import Document
 from bs4 import BeautifulSoup
+
 import pytest
+
 
 
 @pytest.fixture
@@ -167,42 +169,48 @@ def complex_table():
 
 
 def test_can_parse_page_styles(page_styles):
-    page_style_processer = BaseStyleProcesser(page_styles)
-    assert len(page_style_processer.page_styles) == 2
+    page_style_handler = BaseStyleHandler()
+    page_style_handler.setup_styles(page_styles)
+    assert len(page_style_handler.page_rules) == 2
 
 
 def test_can_parse_base_tag_styles(tag_styles, tag_name_selector):
-    tag_style_processer = BaseStyleProcesser(tag_styles, tag_name_selector)
-    assert len(tag_style_processer.tag_rules) == 1
-    for rule in tag_style_processer.tag_rules:
+    tag_style_handler = BaseStyleHandler(tag_name_selector)
+    tag_style_handler.setup_styles(tag_styles)
+    assert len(tag_style_handler.tag_rules) == 1
+    for rule in tag_style_handler.tag_rules:
         assert rule.selectorText == "table"
 
 
 def test_can_parse_single_tag_styles(single_selector_tag_styles, single_selector):
-    tag_style_processer = BaseStyleProcesser(single_selector_tag_styles, single_selector)
-    assert len(tag_style_processer.tag_rules) == 1
-    for rule in tag_style_processer.tag_rules:
+    tag_style_handler = BaseStyleHandler(single_selector)
+    tag_style_handler.setup_styles(single_selector_tag_styles)
+    assert len(tag_style_handler.tag_rules) == 1
+    for rule in tag_style_handler.tag_rules:
         assert rule.selectorText == ".tar"
 
 
 def test_can_parse_complex_selector_1(complex_styles_1, complex_selector_1):
-    tag_style_processer = BaseStyleProcesser(complex_styles_1, complex_selector_1)
-    assert len(tag_style_processer.tag_rules) == 1
-    for rule in tag_style_processer.tag_rules:
+    tag_style_handler = BaseStyleHandler(complex_selector_1)
+    tag_style_handler.setup_styles(complex_styles_1)
+    assert len(tag_style_handler.tag_rules) == 1
+    for rule in tag_style_handler.tag_rules:
         assert rule.selectorText == ".title td"
 
 
 def test_can_parse_complex_selector_2(complex_styles_2, complex_selector_2):
-    tag_style_processer = BaseStyleProcesser(complex_styles_2, complex_selector_2)
-    assert len(tag_style_processer.tag_rules) == 1
-    for rule in tag_style_processer.tag_rules:
+    tag_style_handler = BaseStyleHandler(complex_selector_2)
+    tag_style_handler.setup_styles(complex_styles_2)
+    assert len(tag_style_handler.tag_rules) == 1
+    for rule in tag_style_handler.tag_rules:
         assert rule.selectorText == ".title .tdTitle"
 
 
 def test_can_parse_complex_selector_3(complex_styles_3, complex_selector_3):
-    tag_style_processer = BaseStyleProcesser(complex_styles_3, complex_selector_3)
-    assert len(tag_style_processer.tag_rules) == 1
-    for rule in tag_style_processer.tag_rules:
+    tag_style_handler = BaseStyleHandler(complex_selector_3)
+    tag_style_handler.setup_styles(complex_styles_3)
+    assert len(tag_style_handler.tag_rules) == 1
+    for rule in tag_style_handler.tag_rules:
         assert rule.selectorText == ".title tfoot td"
 
 
@@ -282,3 +290,4 @@ def test_can_mark_up_cells_in_tables(complex_table, document, page_styles):
     assert thirteenth_labled_cell.colspan is None
     assert thirteenth_labled_cell.rowspan is None
     assert thirteenth_labled_cell.index == 13
+
