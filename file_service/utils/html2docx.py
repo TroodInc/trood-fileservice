@@ -284,35 +284,35 @@ class TableDrawer(TableNavigator):
         Fill docx table with HTML tags content. Apply styles on it.
         """
         for cell in self.td_th_cells:
-            cell_styler = CellStyleProcesser(cell.tag, self.raw_styles, cell)
-            cell_styler.apply()
+            cell_handler = CellStyleHandler(cell, cell.tag)
+            cell_handler.apply_styles(self.raw_styles)
             first_cell = cell.docx_cells[0]
             paragraph = first_cell.paragraphs[0]
-            paragraph_styler = ParagraphStyleProcesser(cell.tag, self.raw_styles, paragraph)
-            paragraph_styler.process()
+            paragraph_style_handler = ParagraphStyleHandler(paragraph, cell.tag)
+            paragraph_style_handler.apply_styles(self.raw_styles)
 
 
-class BaseStyleProcesser:
-    def __init__(self, css_styles, tag=None):
-        self.css_styles = css_styles
-        if tag is not None:
-            self.tag = tag
-            self.get_all_rules()
+class BaseStyleHandler:
+    def __init__(self, tag=None):
+        self.tag = tag
 
-        self.page_styles = self.get_page_rules()
+    def setup_styles(self, css_styles):
+        self.raw_rules = self.get_raw_rules(css_styles)
+        self.page_rules = self.get_page_rules()
+        if self.tag:
+            self.get_all_rules(self.tag)
 
-    @property
-    def rules(self):
-        return cssutils.parseString(self.css_styles)
+    def get_raw_rules(self, css_styles):
+        return cssutils.parseString(css_styles)
 
     def get_page_rules(self):
         def is_page_or_star(r):
             return r.type == r.PAGE_RULE or r.selectorText == "*"
 
-        rules = [r for r in self.rules if is_page_or_star(r)]
+        rules = [r for r in self.raw_rules if is_page_or_star(r)]
         return rules
 
-    def get_all_rules(self):
+    def get_all_rules(self, tag):
         """
         Parses selectors of following view:
         single selectors (td, th, table, tr, .className)
@@ -323,13 +323,13 @@ class BaseStyleProcesser:
         Does not parse child selectors  (th:first-child)
         """
         self.tag_rules = set()
-        tag_selectors = self.get_selectors(self.tag)
+        tag_selectors = self.get_selectors(tag)
         for selector in tag_selectors:
-            for rule in self.rules:
+            for rule in self.raw_rules:
                 if f"{selector}" == rule.selectorText:
                     self.tag_rules.add(rule)
                 if f"{selector}" in rule.selectorText:
-                    parent = self.tag.parent
+                    parent = tag.parent
                     wile_loop_limit = 0
                     previous_selector = None
                     while parent and wile_loop_limit < 5:
@@ -359,13 +359,13 @@ class BaseStyleProcesser:
         return selectors
 
 
-class PageStyleProcesser(BaseStyleProcesser):
-    def __init__(self, css_styles, document):
-        super().__init__(css_styles)
+class PageStyleProcesser(BaseStyleHandler):
+    def __init__(self, document):
+        super().__init__()
         self.document = document
 
     def apply_page_margin(self):
-        for rule in self.page_styles:
+        for rule in self.page_rules:
             if "margin" in rule.style.keys():
                 # TODO add marging processing if > 1 arguments provided
                 if len(rule.style["margin"].split()) == 1:
@@ -381,7 +381,7 @@ class PageStyleProcesser(BaseStyleProcesser):
                         section.right_margin = Cm(margin)
 
     def apply_page_font(self):
-        for rule in self.page_styles:
+        for rule in self.page_rules:
             if "font-size" in rule.style.keys():
                 font_size = rule.style["font-size"]
                 font_size = ''.join(re.findall('[^px]', font_size))
@@ -396,30 +396,37 @@ class PageStyleProcesser(BaseStyleProcesser):
                 font = style.font
                 font.name = font_type.capitalize()
 
-    def apply(self):
+    def apply_styles(self, css_styles):
+        self.setup_styles(css_styles)
         self.apply_page_font()
         self.apply_page_margin()
 
 
-class ParagraphStyleProcesser(BaseStyleProcesser):
-    def __init__(self, tag, css_styles, paragraph):
-        super().__init__(css_styles, tag)
+class ParagraphStyleHandler(BaseStyleHandler):
+    def __init__(self, paragraph, tag):
+        super().__init__(tag)
         self.paragraph = paragraph
 
-    def recursive_paragraph_processer(self, element):
-        if not isinstance(element, bs4.element.Tag):
-            run = self.paragraph.add_run(element)
-            self.set_font_style(run)
-        else:
-            paragraph_processer = ParagraphStyleProcesser(element, self.css_styles, self.paragraph)
-            element = '\n' + element.contents[0]
-            paragraph_processer.recursive_paragraph_processer(element)
-
-    def process(self):
+    def apply_styles(self, css_styles):
+        self.setup_styles(css_styles)
         self.set_aligin()
         for element in self.tag.contents:
             if element != '\n':
-                self.recursive_paragraph_processer(element)
+                self.recursive_paragraph_processer(css_styles, element)
+
+    def recursive_paragraph_processer(self, css_styles, element):
+        if not isinstance(element, bs4.element.Tag):
+            run = self.paragraph.add_run(element)
+            self.set_font_style(run, self.tag)
+        else:
+            paragraph_processer = ParagraphStyleHandler(self.paragraph, element)
+            paragraph_processer.setup_styles(css_styles)
+            for element_content in element.contents:
+                if isinstance(element_content, bs4.element.Tag):
+                    paragraph_processer.recursive_paragraph_processer(css_styles, element_content)
+                else:
+                    element_content = '\n' + element_content
+                    paragraph_processer.recursive_paragraph_processer(css_styles, element_content)
 
     def set_aligin(self):
         for rule in self.tag_rules:
@@ -428,7 +435,7 @@ class ParagraphStyleProcesser(BaseStyleProcesser):
                 alignment = getattr(WD_ALIGN_PARAGRAPH, f'{alignment_type}', 'JUSTIFY')
                 self.paragraph.alignment = alignment
 
-    def set_font_style(self, run):
+    def set_font_style(self, run, tag):
         for rule in self.tag_rules:
             if "font-size" in rule.style.keys():
                 font_size = rule.style["font-size"]
@@ -441,23 +448,36 @@ class ParagraphStyleProcesser(BaseStyleProcesser):
                 font_type = rule.style['font-family'].split()[0].strip(',')
                 font = run.font
                 font.name = font_type.capitalize()
-            if "font-weight" in rule.style.keys() or self.tag.name == 'b':
+            if "font-weight" in rule.style.keys() or tag.name == 'b':
                 font_wight = rule.style['font-weight']
-                if font_wight == "bold" or self.tag.name == 'b':
+                if font_wight == "bold" or tag.name == 'b':
                     run.bold = True
 
 
-class CellStyleProcesser(BaseStyleProcesser):
-    def __init__(self, tag, css_styles, cell):
-        super().__init__(css_styles, tag)
+class CellStyleHandler(BaseStyleHandler):
+    def __init__(self, cell, tag):
+        super().__init__(tag)
         self.cell = cell
 
-    def set_cell_border(self, cell, **kwargs):
+    @property
+    def border_rules(self):
+        border_rules = set()
+        for rule in self.tag_rules:
+            if "border-bottom" in rule.style.keys() or "border" in rule.style.keys():
+                border_rules.add(rule)
+        return border_rules
+
+    def cell_border_managing(self,
+                             cell,
+                             start={"val": "nil"},
+                             top={"val": "nil"},
+                             end={"val": "nil"},
+                             bottom={"val": "nil"}):
         """
         Set cell`s border
         Usage:
 
-        self.set_cell_border(
+        self.cell_border_managing(
             cell,
             top={"sz": 12, "val": "single"},
             bottom={"sz": 12, "val": "single"},
@@ -475,7 +495,7 @@ class CellStyleProcesser(BaseStyleProcesser):
             tcPr.append(tcBorders)
 
         for edge in ('start', 'top', 'end', 'bottom'):
-            edge_data = kwargs.get(edge)
+            edge_data = locals().get(edge)
             if edge_data:
                 tag = 'w:{}'.format(edge)
 
@@ -498,40 +518,33 @@ class CellStyleProcesser(BaseStyleProcesser):
                     cell_width_pt = convert_px_to_pt(cell_width_px)
                     docx_cell.width = Pt(cell_width_pt)
 
-    def apply_borders(self):
+    def set_null_borders(self):
         for docx_cell in self.cell.docx_cells:
-            for rule in self.tag_rules:
-                if "border-bottom" in rule.style.keys():
-                    if 'solid' in rule.style["border-bottom"]:
-                        bottom = {"val": "thick", "sz": 2}
-                        self.set_cell_border(
-                            docx_cell,
-                            bottom=bottom
-                            )
-
+            for rule in self.border_rules:
+                bottom = {"val": "nil"}
                 if "border" in rule.style.keys():
                     if rule.style.border == 'none':
-                        try:
-                            bottom
-                        except NameError:
-                            bottom = None
-                        if bottom:
-                            self.set_cell_border(
+                        self.cell_border_managing(
                                 docx_cell,
-                                start={"val": "nil"},
-                                top={"val": "nil"},
-                                end={"val": "nil"}
-                                )
-                        if bottom is None:
-                            self.set_cell_border(
-                                docx_cell,
-                                start={"val": "nil"},
-                                top={"val": "nil"},
-                                end={"val": "nil"},
-                                bottom={"val": "nil"}
+                                bottom=bottom
                                 )
 
-    def apply(self):
+    def set_solid_borders(self):
+        for docx_cell in self.cell.docx_cells:
+            for rule in self.border_rules:
+                if 'solid' in rule.style["border-bottom"]:
+                    bottom = {"val": "thick", "sz": 2}
+                    self.cell_border_managing(
+                        docx_cell,
+                        bottom=bottom
+                        )
+
+    def apply_borders(self):
+        self.set_null_borders()
+        self.set_solid_borders()
+
+    def apply_styles(self, css_styles):
+        self.setup_styles(css_styles)
         self.apply_borders()
         self.apply_column_width()
 
@@ -555,11 +568,8 @@ class HTML2DOCX:
         return html_doc
 
     def set_page_styles(self):
-        styler = PageStyleProcesser(self.raw_styles, self.document)
-        styler.apply()
-
-    def get_styler(self):
-        return PageStyleProcesser(self.raw_styles, self.document)
+        page_style_handler = PageStyleProcesser(self.document)
+        page_style_handler.apply_styles(self.raw_styles)
 
     def write_docx(self):
         self.set_page_styles()
@@ -582,10 +592,8 @@ class HTML2DOCX:
 
     def process_paragraph_tag(self, tag):
         paragraph = self.document.add_paragraph()
-        paragraph_styler = ParagraphStyleProcesser(tag,
-                                                   self.raw_styles,
-                                                   paragraph)
-        paragraph_styler.process()
+        paragraph_style_handler = ParagraphStyleHandler(paragraph, tag)
+        paragraph_style_handler.apply_styles(self.raw_styles)
 
     def process_table_tag(self, tag):
         drawer = TableDrawer(tag, self.document, self.raw_styles)
