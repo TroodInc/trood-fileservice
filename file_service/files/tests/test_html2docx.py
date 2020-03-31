@@ -1,9 +1,8 @@
-from html2docx import BaseStyleHandler, TableCreator, TableDrawer
+from file_service.utils.html2docx import BaseStyleHandler, TableCreator, TableDrawer
 from docx import Document
 from bs4 import BeautifulSoup
 
 import pytest
-
 
 
 @pytest.fixture
