@@ -323,34 +323,55 @@ class BaseStyleHandler:
         Does not parse child selectors  (th:first-child)
         """
         self.tag_rules = set()
-        tag_selectors = self.get_selectors(tag)
+        raw_tag_rules = self._get_raw_tag_rules(tag)
+        self._get_simple_selector_rules(tag, raw_tag_rules)
+        self._get_complex_selectors(tag, raw_tag_rules)
+
+    def _get_raw_tag_rules(self, tag):
+        raw_tag_rules = set()
+        tag_selectors = self._get_selectors(tag)
         for selector in tag_selectors:
             for rule in self.raw_rules:
+                if f"{selector}" in rule.selectorText:
+                    raw_tag_rules.add(rule)
+        return raw_tag_rules
+
+    def _get_simple_selector_rules(self, tag, raw_tag_rules):
+        tag_selectors = self._get_selectors(tag)
+        for selector in tag_selectors:
+            for rule in raw_tag_rules:
                 if f"{selector}" == rule.selectorText:
                     self.tag_rules.add(rule)
-                if f"{selector}" in rule.selectorText:
-                    parent = tag.parent
-                    wile_loop_limit = 0
-                    previous_selector = None
-                    while parent and wile_loop_limit < 5:
-                        parent_selectors = self.get_selectors(parent)
 
-                        for parent_selector in parent_selectors:
+    def _find_selector_rules(self, tag, selector, rule):
+        parent = tag.parent
+        wile_loop_limit = 0
+        previous_selector = None
+        while parent and wile_loop_limit < 5:
+            parent_selectors = self._get_selectors(parent)
 
-                            if previous_selector is None:
-                                current_selector = f"{parent_selector} {selector}"
-                            elif previous_selector:
-                                current_selector = f"{parent_selector} {previous_selector}"
+            for parent_selector in parent_selectors:
 
-                            if current_selector in rule.selectorText:
-                                if current_selector == rule.selectorText:
-                                    self.tag_rules.add(rule)
-                                previous_selector = current_selector
+                if previous_selector is None:
+                    current_selector = f"{parent_selector} {selector}"
+                elif previous_selector:
+                    current_selector = f"{parent_selector} {previous_selector}"
 
-                            parent = parent.parent
-                            wile_loop_limit += 1
+                if current_selector in rule.selectorText:
+                    if current_selector == rule.selectorText:
+                        self.tag_rules.add(rule)
+                    previous_selector = current_selector
 
-    def get_selectors(self, tag):
+                parent = parent.parent
+                wile_loop_limit += 1
+
+    def _get_complex_selectors(self, tag, raw_tag_rules):
+        tag_selectors = self._get_selectors(tag)
+        for selector in tag_selectors:
+            for rule in raw_tag_rules:
+                self._find_selector_rules(tag, selector, rule)
+
+    def _get_selectors(self, tag):
         selectors = tag.get('class', [])
         if selectors:
             selectors = [f'.{selector}' for selector in selectors]
