@@ -244,3 +244,15 @@ class FileExtensionTestCase(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
         assert response.data[0]['extension'] == 'mp4'
+
+
+class ProbeTestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_create_extension(self):
+        url = reverse('api:probe-list')
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        for key in ('status', 'uptime', 'version'):
+            assert key in response.data, response.json()

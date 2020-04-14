@@ -1,6 +1,7 @@
 import os
 from configurations import Configuration
 import dj_database_url
+import time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -10,6 +11,8 @@ def rel(*x):
 
 
 class BaseConfiguration(Configuration):
+    START_TIME = time.time()
+
     # Database
     # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
     DATABASES = {
