@@ -1,7 +1,9 @@
+import time
+import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
@@ -107,3 +109,26 @@ class FileTemplateViewSet(viewsets.ModelViewSet):
 
         result = render_file(template, request.data.get('format'), data, request.user)
         return Response(data={"status": "OK", "data": result}, status=status.HTTP_201_CREATED)
+
+
+class ProbeViewset(viewsets.ViewSet):
+    permission_classes = (permissions.AllowAny, )
+
+    def list(self, request):
+        return Response(data={
+            "status": self.get_status(),
+            "version": self.get_version(),
+            "uptime": self.get_uptime()
+        })
+
+    def get_status(self):
+        return "healthy"
+
+    def get_version(self):
+        filepath = os.path.join(settings.BASE_DIR, "VERSION")
+        with open(filepath, "r") as version_file:
+            version = version_file.readlines()
+        return "".join(version).strip()
+    
+    def get_uptime(self):
+        return int(time.time() - settings.START_TIME)
