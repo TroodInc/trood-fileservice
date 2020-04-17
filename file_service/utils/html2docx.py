@@ -559,15 +559,44 @@ class CellStyleHandler(BaseStyleHandler):
                     if key in edge_data:
                         element.set(qn('w:{}'.format(key)), str(edge_data[key]))
 
+    def _apply_column_width_cm(self, cell_width):
+        cell_width_cm = ''.join(re.findall('[^cm]', cell_width))
+        cell_width_cm = float(cell_width_cm)
+        cell_index = self.cell.labled_cells[0].index
+        column_idx, _ = self.cell._get_column(cell_index)
+        column_cells = self.cell.table.column_cells(column_idx)
+
+        for cell_ in column_cells:
+            cell_.width = Cm(cell_width_cm)
+
+    def _apply_column_width_percent(self, cell_width):
+        section = self.document.sections[0]
+        width = section.page_width.cm
+        left_margin = section.left_margin.cm
+        right_margin = section.right_margin.cm
+        full_width = width - left_margin - right_margin
+
+        cell_width_percent = ''.join(re.findall('[^%]', cell_width))
+        cell_share = int(cell_width_percent) / 100
+        cell_width_cm = cell_share * full_width
+        cell_width_cm = float(cell_width_cm)
+        cell_index = self.cell.labled_cells[0].index
+        column_idx, _ = self.cell._get_column(cell_index)
+        column_cells = self.cell.table.column_cells(column_idx)
+
+        for cell_ in column_cells:
+            cell_.width = Cm(cell_width_cm)
+
     def apply_column_width(self):
         for docx_cell in self.cell.docx_cells:
             for rule in self.tag_rules:
                 if "width" in rule.style.keys():
-                    cell_width_text = rule.style["width"]
-                    cell_width_px = ''.join(re.findall('[^px]', cell_width_text))
-                    cell_width_px = int(cell_width_px)
-                    cell_width_pt = convert_px_to_pt(cell_width_px)
-                    docx_cell.width = Pt(cell_width_pt)
+                    cell_width = rule.style["width"]
+                    if "cm" in cell_width:
+                        self._apply_column_width_cm(cell_width)
+
+                    elif "%" in cell_width:
+                        self._apply_column_width_percent(cell_width)
 
     def set_null_borders(self):
         for docx_cell in self.cell.docx_cells:
