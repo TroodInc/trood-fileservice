@@ -284,7 +284,7 @@ class TableDrawer(TableNavigator):
         Fill docx table with HTML tags content. Apply styles on it.
         """
         for cell in self.td_th_cells:
-            cell_handler = CellStyleHandler(cell, cell.tag)
+            cell_handler = CellStyleHandler(cell, cell.tag, self.document)
             cell_handler.apply_styles(self.raw_styles)
             first_cell = cell.docx_cells[0]
             paragraph = first_cell.paragraphs[0]
@@ -506,9 +506,10 @@ class ParagraphStyleHandler(BaseStyleHandler):
 
 
 class CellStyleHandler(BaseStyleHandler):
-    def __init__(self, cell, tag):
+    def __init__(self, cell, tag, document):
         super().__init__(tag)
         self.cell = cell
+        self.document = document
 
     @property
     def border_rules(self):
