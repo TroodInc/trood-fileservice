@@ -1,4 +1,6 @@
-from file_service.utils.html2docx import BaseStyleHandler, TableCreator, TableDrawer
+from file_service.utils.html2docx import (BaseStyleHandler,
+                                          TableCreator, TableDrawer,
+                                          PageStyleProcesser)
 from docx import Document
 from bs4 import BeautifulSoup
 
@@ -13,6 +15,27 @@ def page_styles():
     </style>"""
     bs_style = BeautifulSoup(page_styles, 'html.parser').find_all('style')[0].contents[0].strip()
     return bs_style
+
+
+@pytest.fixture
+def page_size_a4():
+    page_styles = """<style>
+    @page { size: A4; }
+    * { }
+    </style>"""
+    bs_style = BeautifulSoup(page_styles, 'html.parser').find_all('style')[0].contents[0].strip()
+    return bs_style
+
+
+@pytest.fixture
+def page_size_letter():
+    page_styles = """<style>
+    @page { size: Letter; }
+    * { }
+    </style>"""
+    bs_style = BeautifulSoup(page_styles, 'html.parser').find_all('style')[0].contents[0].strip()
+    return bs_style
+
 
 @pytest.fixture
 def single_selector_tag_styles():
@@ -290,3 +313,24 @@ def test_can_mark_up_cells_in_tables(complex_table, document, page_styles):
     assert thirteenth_labled_cell.rowspan is None
     assert thirteenth_labled_cell.index == 13
 
+def test_page_size(page_size_a4, page_size_letter, document):
+    A4_height = 297
+    A4_width = 210
+
+    page = PageStyleProcesser(document)
+    page.setup_styles(page_size_a4)
+    page.apply_styles(page_size_a4)
+    
+    # convert to int because it saves values like 210.00861111111112 and 297.0036111111111
+    assert int(page.document.sections[0].page_height.mm) == A4_height
+    assert int(page.document.sections[0].page_width.mm) == A4_width
+
+    letter_height = 279.4
+    letter_width = 215.9
+
+    page = PageStyleProcesser(document)
+    page.setup_styles(page_size_letter)
+    page.apply_styles(page_size_letter)
+
+    assert page.document.sections[0].page_height.mm == letter_height
+    assert page.document.sections[0].page_width.mm == letter_width

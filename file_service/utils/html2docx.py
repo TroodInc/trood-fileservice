@@ -6,7 +6,7 @@ import re
 from bs4 import BeautifulSoup
 from collections import namedtuple
 from docx import Document
-from docx.shared import Cm, Pt
+from docx.shared import Cm, Pt, Mm
 
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
@@ -385,6 +385,34 @@ class PageStyleProcesser(BaseStyleHandler):
         super().__init__()
         self.document = document
 
+    def set_paragraph_spacing(self):
+        paragraph_format = self.document.styles['Normal'].paragraph_format
+        paragraph_format.space_before = Pt(5)
+        paragraph_format.line_spacing = Pt(15)
+
+    def _apply_A4_size(self):
+        section = self.document.sections[0]
+        A4_height = 297
+        A4_width = 210
+        section.page_height = Mm(A4_height)
+        section.page_width = Mm(A4_width)
+
+    def _apply_letter_size(self):
+        section = self.document.sections[0]
+        letter_height = 279.4
+        letter_width = 215.9
+        section.page_height = Mm(letter_height)
+        section.page_width = Mm(letter_width)
+
+    def set_page_size(self):
+        for rule in self.page_rules:
+            if "size" in rule.style.keys():
+                size = rule.style["size"]
+                if size == "Letter":
+                    self._apply_letter_size()
+                if size == "A4":
+                    self._apply_A4_size()
+
     def apply_page_margin(self):
         for rule in self.page_rules:
             if "margin" in rule.style.keys():
@@ -421,6 +449,8 @@ class PageStyleProcesser(BaseStyleHandler):
         self.setup_styles(css_styles)
         self.apply_page_font()
         self.apply_page_margin()
+        self.set_page_size()
+        self.set_paragraph_spacing()
 
 
 class ParagraphStyleHandler(BaseStyleHandler):
@@ -529,15 +559,44 @@ class CellStyleHandler(BaseStyleHandler):
                     if key in edge_data:
                         element.set(qn('w:{}'.format(key)), str(edge_data[key]))
 
+    def _apply_column_width_cm(self, cell_width):
+        cell_width_cm = ''.join(re.findall('[^cm]', cell_width))
+        cell_width_cm = float(cell_width_cm)
+        cell_index = self.cell.labled_cells[0].index
+        column_idx, _ = self.cell._get_column(cell_index)
+        column_cells = self.cell.table.column_cells(column_idx)
+
+        for cell_ in column_cells:
+            cell_.width = Cm(cell_width_cm)
+
+    def _apply_column_width_percent(self, cell_width):
+        section = self.document.sections[0]
+        width = section.page_width.cm
+        left_margin = section.left_margin.cm
+        right_margin = section.right_margin.cm
+        full_width = width - left_margin - right_margin
+
+        cell_width_percent = ''.join(re.findall('[^%]', cell_width))
+        cell_share = int(cell_width_percent) / 100
+        cell_width_cm = cell_share * full_width
+        cell_width_cm = float(cell_width_cm)
+        cell_index = self.cell.labled_cells[0].index
+        column_idx, _ = self.cell._get_column(cell_index)
+        column_cells = self.cell.table.column_cells(column_idx)
+
+        for cell_ in column_cells:
+            cell_.width = Cm(cell_width_cm)
+
     def apply_column_width(self):
         for docx_cell in self.cell.docx_cells:
             for rule in self.tag_rules:
                 if "width" in rule.style.keys():
-                    cell_width_text = rule.style["width"]
-                    cell_width_px = ''.join(re.findall('[^px]', cell_width_text))
-                    cell_width_px = int(cell_width_px)
-                    cell_width_pt = convert_px_to_pt(cell_width_px)
-                    docx_cell.width = Pt(cell_width_pt)
+                    cell_width = rule.style["width"]
+                    if "cm" in cell_width:
+                        self._apply_column_width_cm(cell_width)
+
+                    elif "%" in cell_width:
+                        self._apply_column_width_percent(cell_width)
 
     def set_null_borders(self):
         for docx_cell in self.cell.docx_cells:
