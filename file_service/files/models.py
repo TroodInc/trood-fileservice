@@ -23,12 +23,19 @@ def validate_file_extention(value):
         raise ValidationError(_('Unsupported file type'))
 
 
-class FileType(models.Model):
+class BaseModel(models.Model):
+    owner = models.IntegerField(_('Owner'), null=True)
+
+    class Meta:
+        abstract = True
+
+
+class FileType(BaseModel):
     id = models.CharField(primary_key=True, unique=True, max_length=32)
     mime = models.TextField()
 
 
-class File(models.Model):
+class File(BaseModel):
     ACCESS_CHOICES = (
         ('PRIVATE', _('Private')),
         ('PROTECTED', _('Protected')),
@@ -36,7 +43,6 @@ class File(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.IntegerField(_('Owner'), null=True)
     created = models.DateTimeField(_('Created Date'), auto_now_add=True)
 
     file = models.FileField(_('File'), upload_to=create_unique_filename, validators=(validate_file_extention, ))
@@ -75,11 +81,11 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
 
-class FileExtension(models.Model):
+class FileExtension(BaseModel):
     extension = models.CharField(max_length=255)
 
 
-class FileTemplate(models.Model):
+class FileTemplate(BaseModel):
     alias = models.CharField(unique=True, max_length=128, null=True)
     name = models.CharField(max_length=128, blank=True, null=True)
     filename_template = models.CharField(max_length=128, blank=True, null=True)

@@ -19,7 +19,7 @@ Pillow==7.0.0
 python-resize-image==1.1.19
 dj_database_url==0.5.0
 WeasyPrint==51
-pdfminer-six==20200124
+pdfminer-six
 PyYAML==5.3
 uritemplate==3.0.1
 jsonfield==3.0.0
