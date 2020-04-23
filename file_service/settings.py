@@ -38,7 +38,6 @@ class BaseConfiguration(Configuration):
         'rest_framework',
 
         'file_service.files',
-        'file_service.utils',
         'trood.contrib.django.apps.plugins',
     ]
 
