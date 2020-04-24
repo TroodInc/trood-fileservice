@@ -37,6 +37,7 @@ class BaseConfiguration(Configuration):
         'django.contrib.sessions',
         'django.contrib.staticfiles',
         'raven.contrib.django.raven_compat',
+        'storages',
 
         'rest_framework',
 
@@ -64,7 +65,7 @@ class BaseConfiguration(Configuration):
         'DEFAULT_FILTER_BACKENDS': (
             'rest_framework.filters.OrderingFilter',
             'rest_framework.filters.SearchFilter',
-             'trood.contrib.django.filters.TroodRQLFilterBackend',
+            'trood.contrib.django.filters.TroodRQLFilterBackend',
         ),
         'DEFAULT_PAGINATION_CLASS': 'trood.contrib.django.pagination.TroodRQLPagination',
     }
@@ -105,15 +106,33 @@ class BaseConfiguration(Configuration):
 
     DATE_FORMAT = '%d-%m-%Y'
 
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
+    # Absolute url
+    FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
+
+    STORAGE_TYPE = os.environ.get('STORAGE_TYPE', 'DISK')
 
     STATIC_URL = '/static/'
     STATIC_ROOT = os.environ.get('FILE_SERVICE_STATIC_ROOT', rel('static'))
 
-    # Absolute url
-    FILES_BASE_URL = os.environ.get('FILES_BASE_URL', '/media/')
+    MEDIA_URL = '/media/'
 
+    if STORAGE_TYPE == "DISK":
+        MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', rel('media'))
+
+    if STORAGE_TYPE == 'DO_SPACES':
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+        AWS_ACCESS_KEY_ID = os.environ.get('SPACES_ACCESS_KEY')
+        AWS_SECRET_ACCESS_KEY = os.environ.get('SPACES_SECRET_ACCESS_KEY')
+        AWS_STORAGE_BUCKET_NAME = os.environ.get('SPACES_BUCKET')
+        AWS_S3_ENDPOINT_URL = 'https://fra1.digitaloceanspaces.com'
+        AWS_S3_OBJECT_PARAMETERS = {
+            'CacheControl': 'max-age=86400',
+        }
+
+        MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', 'media')
+
+        AWS_LOCATION = os.path.join(os.environ.get('SPACES_PATH', ''), MEDIA_ROOT)
 
     IMAGE_SIZES = {
         'small': 128,

@@ -27,5 +27,7 @@ textract==1.6.3
 docx==0.2.4
 cssutils==1.0.2
 python-docx==0.8.10
+boto3
+django-storages
 
-trood==2020.4.dev27
+trood==2020.4.dev28
