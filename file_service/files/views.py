@@ -38,7 +38,13 @@ def render_file(template, file_format, data, user):
         return serializers.FileSerializer(file).data
 
 
-class FilesViewSet(viewsets.ModelViewSet):
+class BaseViewSet(viewsets.ModelViewSet):
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user.id)
+
+
+class FilesViewSet(BaseViewSet):
     parser_classes = (FormParser, MultiPartParser, JSONParser)
 
     queryset = models.File.objects.all()
@@ -68,25 +74,22 @@ class FilesViewSet(viewsets.ModelViewSet):
             }
         )
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user.id)
-
     def perform_destroy(self, instance):
         instance.deleted = True
         instance.save()
 
 
-class FileExtensionViewSet(viewsets.ModelViewSet):
+class FileExtensionViewSet(BaseViewSet):
     queryset = models.FileExtension.objects.all()
     serializer_class = serializers.FileExtensionSerializer
 
 
-class FileTypeViewSet(viewsets.ModelViewSet):
+class FileTypeViewSet(BaseViewSet):
     queryset = models.FileType.objects.all()
     serializer_class = serializers.FileTypeSerializer
 
 
-class FileTemplateViewSet(viewsets.ModelViewSet):
+class FileTemplateViewSet(BaseViewSet):
     queryset = models.FileTemplate.objects.all()
     serializer_class = serializers.FileTemplateSerializer
 
