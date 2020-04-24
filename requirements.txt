@@ -30,4 +30,4 @@ python-docx==0.8.10
 boto3
 django-storages
 
-trood==2020.4.dev27
+trood==2020.4.dev28
