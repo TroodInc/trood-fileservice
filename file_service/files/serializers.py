@@ -27,7 +27,7 @@ class FileSerializer(serializers.ModelSerializer):
             'id', 'owner', 'created', 'file',
             'file_url', 'filename', 'origin_filename',
             'type', 'mimetype', 'size',
-            'ready', 'metadata', 'deleted',
+            'ready', 'metadata', 'deleted', 'access'
         )
         read_only_fields = ('created', 'id', 'type', 'mimetype', 'size', 'file_url', )
 
