@@ -28,4 +28,4 @@ docx==0.2.4
 cssutils==1.0.2
 python-docx==0.8.10
 
-trood
+trood==2020.4.dev27
