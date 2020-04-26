@@ -83,3 +83,9 @@ class FromTemplateSerializer(serializers.Serializer):
     template = serializers.CharField()
     access = serializers.ChoiceField(choices=files_models.File.ACCESS_CHOICES)
     tags = serializers.PrimaryKeyRelatedField(queryset=files_models.Tag.objects.all(), many=True)
+
+
+class FileTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.Tag
+        fields = ('id', 'tag')

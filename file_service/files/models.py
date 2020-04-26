@@ -96,4 +96,3 @@ class FileTextContent(models.Model):
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True)
-

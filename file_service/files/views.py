@@ -129,6 +129,11 @@ class ProbeViewset(viewsets.ViewSet):
         with open(filepath, "r") as version_file:
             version = version_file.readlines()
         return "".join(version).strip()
-    
+
     def get_uptime(self):
         return int(time.time() - settings.START_TIME)
+
+
+class FileTag(viewsets.ModelViewSet):
+    queryset = models.Tag.objects.all()
+    serializer_class = serializers.FileTagSerializer
