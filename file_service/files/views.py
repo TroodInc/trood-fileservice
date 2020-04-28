@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
@@ -115,8 +115,6 @@ class FileTemplateViewSet(BaseViewSet):
 
 
 class ProbeViewset(viewsets.ViewSet):
-    permission_classes = (permissions.AllowAny, )
-
     def list(self, request):
         return Response(data={
             "status": self.get_status(),
