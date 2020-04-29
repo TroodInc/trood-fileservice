@@ -1,4 +1,4 @@
-FROM python:3.6.7
+FROM python:3.6-alpine
 
 ENV APPDIR=/home/src
 ENV PYTHONPATH=$PYTHONPATH:$APPDIR
@@ -12,13 +12,18 @@ COPY ./manage.py $APPDIR/
 COPY ./requirements.txt $APPDIR/
 COPY ./pytest.ini $APPDIR/
 COPY ./docs/_static/swagger.yml $APPDIR/static/
-COPY ./VERSION $APPDIR/
 
-RUN apt-get update -y && \
-    apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr libjpeg-dev swig 
-RUN pip install -r $APPDIR/requirements.txt --upgrade
 
-RUN echo $TAG > ${APPDIR}/VERSION
+RUN apk add --no-cache \
+    build-base cairo-dev cairo cairo-tools \
+    jpeg-dev zlib-dev freetype-dev \
+    postgresql-dev \
+    gcc libxslt-dev
+
+RUN apk --update add git less openssh
+
+RUN pip install --upgrade pip && \
+    pip install -r $APPDIR/requirements.txt --upgrade
 
 EXPOSE 8000
 CMD /usr/local/bin/gunicorn -w 4 -b 0.0.0.0:8000 --reload --access-logfile - file_service.wsgi:application
