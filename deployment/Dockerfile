@@ -12,6 +12,7 @@ COPY ./manage.py $APPDIR/
 COPY ./requirements.txt $APPDIR/
 COPY ./pytest.ini $APPDIR/
 COPY ./docs/_static/swagger.yml $APPDIR/static/
+COPY ./VERSION $APPDIR/
 
 
 RUN apk add --no-cache \
@@ -24,6 +25,8 @@ RUN apk --update add git less openssh
 
 RUN pip install --upgrade pip && \
     pip install -r $APPDIR/requirements.txt --upgrade
+
+RUN echo $TAG > ${APPDIR}/VERSION
 
 EXPOSE 8000
 CMD /usr/local/bin/gunicorn -w 4 -b 0.0.0.0:8000 --reload --access-logfile - file_service.wsgi:application
