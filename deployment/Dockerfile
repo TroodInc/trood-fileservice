@@ -19,12 +19,10 @@ RUN apk add --no-cache \
     build-base cairo-dev cairo cairo-tools \
     jpeg-dev zlib-dev freetype-dev \
     postgresql-dev \
-    gcc libxslt-dev
-
-RUN apk --update add git less openssh
-
-RUN pip install --upgrade pip && \
-    pip install -r $APPDIR/requirements.txt --upgrade
+    gcc libxslt-dev && \
+    pip install --upgrade pip --force-reinstall --no-cache-dir && \
+    pip install -r $APPDIR/requirements.txt --upgrade && \
+    apk del --no-cache
 
 RUN echo $TAG > ${APPDIR}/VERSION
 
