@@ -1,4 +1,4 @@
-FROM python:3.6.7
+FROM python:3.6-alpine
 
 ENV APPDIR=/home/src
 ENV PYTHONPATH=$PYTHONPATH:$APPDIR
@@ -14,9 +14,15 @@ COPY ./pytest.ini $APPDIR/
 COPY ./docs/_static/swagger.yml $APPDIR/static/
 COPY ./VERSION $APPDIR/
 
-RUN apt-get update -y && \
-    apt-get install -y python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr libjpeg-dev swig 
-RUN pip install -r $APPDIR/requirements.txt --upgrade
+
+RUN apk add --no-cache \
+    build-base cairo-dev cairo cairo-tools \
+    jpeg-dev zlib-dev freetype-dev \
+    postgresql-dev \
+    gcc libxslt-dev && \
+    pip install --upgrade pip --force-reinstall --no-cache-dir && \
+    pip install -r $APPDIR/requirements.txt --upgrade && \
+    apk del --no-cache
 
 RUN echo $TAG > ${APPDIR}/VERSION
 
