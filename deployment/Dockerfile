@@ -19,10 +19,20 @@ RUN apk add --no-cache \
     build-base cairo-dev cairo cairo-tools \
     jpeg-dev zlib-dev freetype-dev \
     postgresql-dev \
-    gcc libxslt-dev && \
+    libxml2-dev antiword ghostscript-dev poppler-utils tesseract-ocr swig\
+    gcc libxslt-dev  autoconf automake && \
     pip install --upgrade pip --force-reinstall --no-cache-dir && \
     pip install -r $APPDIR/requirements.txt --upgrade && \
     apk del --no-cache
+
+RUN cd ~ && \
+  wget http://www.gnu.org/software/unrtf/unrtf-0.21.9.tar.gz && \
+  tar xzvf unrtf-0.21.9.tar.gz && \
+  cd unrtf-0.21.9/ && \
+  ./bootstrap && \
+  ./configure && \
+  make && \
+  make install
 
 RUN echo $TAG > ${APPDIR}/VERSION
 
