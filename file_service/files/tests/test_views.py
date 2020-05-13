@@ -45,12 +45,20 @@ class FilesBehaviourTestCase(APITestCase):
 
         FileType.objects.get_or_create(id="IMAGE", mime="image/jpeg")
         FileType.objects.get_or_create(id="AUDIO", mime="audio/x-hx-aac-adts")
+        data = {
+            'tag': 'first tag'
+        }
+        response = cls.client.post('/api/v1.0/tag/', data=data, format='json')
+        cls.tag_id = response.data['id']
+        response = cls.client.get(f'/api/v1.0/tag/{cls.tag_id}/',
+                                  format='json')
+        assert response.status_code == status.HTTP_200_OK
 
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_can_upload_image_file(self):
         url = reverse('api:file-list', )
         test_file, test_file_path = create_temp_file('.jpg', data=jpg_file_data)
-        file_data = {'file': test_file, 'name': 'myfile'}
+        file_data = {'file': test_file, 'name': 'myfile', 'tags': self.tag_id}
         response = self.client.post(url, data=file_data, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -68,7 +76,7 @@ class FilesBehaviourTestCase(APITestCase):
     def test_can_upload_audio_file(self):
         url = reverse('api:file-list', )
         test_file, test_file_path = create_temp_file('.aac', data=aac_file_data)
-        file_data = {'file': test_file, 'name': 'myfile'}
+        file_data = {'file': test_file, 'name': 'myfile', 'tags': self.tag_id}
         response = self.client.post(url, data=file_data, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -92,7 +100,8 @@ class FilesBehaviourTestCase(APITestCase):
     def test_filename_handling(self):
         url = reverse('api:file-list', )
         file_data = {
-            'file': create_temp_file('.jpg', name=u'%4 Русский ..^!?? 影師嗎', data=jpg_file_data), 'name': 'qqq'
+            'file': create_temp_file('.jpg', name=u'%4 Русский ..^!?? 影師嗎', data=jpg_file_data),
+            'name': 'qqq', 'tags': self.tag_id
         }
         response = self.client.post(url, data=file_data, format='multipart')
 
@@ -101,7 +110,8 @@ class FilesBehaviourTestCase(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata(self):
         url = reverse('api:file-list', )
-        file_data = {'file': create_temp_file('.aac', data=aac_file_data), 'name': 'myfile'}
+        file_data = {'file': create_temp_file('.aac', data=aac_file_data),
+                     'name': 'myfile', 'tags': self.tag_id}
         response = self.client.post(url, data=file_data, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -115,7 +125,8 @@ class FilesBehaviourTestCase(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_update_audio_file_metadata_with_error_message(self):
         url = reverse('api:file-list', )
-        file_data = {'file': create_temp_file('.aac', data=aac_file_data), 'name': 'myfile'}
+        file_data = {'file': create_temp_file('.aac', data=aac_file_data),
+                     'name': 'myfile', 'tags': self.tag_id}
         response = self.client.post(url, data=file_data, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -137,7 +148,6 @@ class FileExtensionTestCase(APITestCase):
         })
 
         self.client.force_authenticate(user=trood_user)
-
 
     def test_create_extension(self):
         data = {
