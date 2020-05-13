@@ -19,7 +19,7 @@ RUN apk add --no-cache \
     build-base cairo-dev cairo cairo-tools \
     jpeg-dev zlib-dev freetype-dev \
     postgresql-dev \
-    libxml2-dev antiword ghostscript-dev poppler-utils tesseract-ocr swig\
+    libxml2-dev antiword ghostscript-dev poppler-utils pango-dev tesseract-ocr swig\
     gcc libxslt-dev  autoconf automake && \
     pip install --upgrade pip --force-reinstall --no-cache-dir && \
     pip install -r $APPDIR/requirements.txt --upgrade && \
