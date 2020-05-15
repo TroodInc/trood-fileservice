@@ -59,7 +59,7 @@ class File(BaseModel):
     deleted = models.BooleanField(_('Deleted'), default=False)
 
     metadata = JSONField(_('Meta data'), null=True, blank=True)
-    tags = models.ManyToManyField('Tag')
+    tags = models.ManyToManyField('Tag', null=True, blank=True)
     access = models.CharField(choices=ACCESS_CHOICES, max_length=10, default='PROTECTED')
 
     def __str__(self):
