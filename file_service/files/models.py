@@ -13,11 +13,19 @@ from rest_framework.exceptions import ValidationError
 
 
 def create_unique_filename(instance, filename):
+    """
+    Provides a unique name for the file in such a way:
+    filename + date(%d%m%y%H%M%S) + extention
+    """
     name, ext = os.path.splitext(filename)
     return '{}-{}{}'.format(slugify(name), datetime.now().strftime('%d%m%y%H%M%S'), ext)
 
 
 def validate_file_extention(value):
+    """
+    Checks the validation of file extention and return a
+    proper message in case of invalide extention.
+    """
     ext = value.name.split('.')[-1]
     allowed_extensions = FileExtension.objects.all().values_list('extension', flat=True)
     if len(allowed_extensions) and not ext.lower() in allowed_extensions and "*" not in allowed_extensions:
@@ -25,6 +33,9 @@ def validate_file_extention(value):
 
 
 class BaseModel(models.Model):
+    """
+    A base model which contains the id of owner.
+    """
     owner = models.IntegerField(_('Owner'), null=True)
 
     class Meta:
@@ -32,11 +43,39 @@ class BaseModel(models.Model):
 
 
 class FileType(BaseModel):
+    """
+    Type of files, such as:
+    - image/jpeg
+    - audio/x-hx-aac-adts
+    etc.
+    """
     id = models.CharField(primary_key=True, unique=True, max_length=32)
     mime = models.TextField()
 
 
 class File(BaseModel):
+    """
+    File model with overriden save() function to customize saving behavior.
+
+    It contains:
+    id                  id of the file in form of UUID.
+    ready               file descriptor(true or false).
+    deleted             deleted status of the file(true or false).
+    created             date of creation.
+    file                file name(which has a unique name).
+    origin_filename     original file name.
+    filename            name of the file
+    size                size of the file.
+    metadata            metadata.
+    mimetype            MIME type of the file.
+    access              file access permission.
+                        It contains 3 different permission:
+                            -Private
+                            -Protected
+                            -Public
+    type                type of file.
+    tags                file tages.
+    """
     ACCESS_CHOICES = (
         ('PRIVATE', _('Private')),
         ('PROTECTED', _('Protected')),
@@ -86,10 +125,20 @@ class File(BaseModel):
 
 
 class FileExtension(BaseModel):
+    """
+    Contains the extension of the file.
+    """
     extension = models.CharField(max_length=255)
 
 
 class FileTemplate(BaseModel):
+    """
+    File template model, which contains:
+    alias               alias name for file template.
+    name                name or header of the file.
+    filename_template   name of the file template.
+    body_template       contains the body of the file.
+    """
     alias = models.CharField(unique=True, max_length=128, null=True)
     name = models.CharField(max_length=128, blank=True, null=True)
     filename_template = models.CharField(max_length=128, blank=True, null=True)
@@ -98,10 +147,21 @@ class FileTemplate(BaseModel):
 
 
 class Tag(models.Model):
+    """
+    Contains file tags.
+    """
     tag = models.CharField(unique=True, max_length=128)
 
 
 class FileTextContent(models.Model):
+    """
+    A model, which contains the content of file text.
+
+    content             body of the text.
+    created             date of creation.
+    source              the id of the file.
+    title               title of the text.
+    """
     source = models.ForeignKey(File, on_delete=models.CASCADE)
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)

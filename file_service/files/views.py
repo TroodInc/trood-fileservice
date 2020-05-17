@@ -14,6 +14,10 @@ from django.template import Template as DjangoTemplate
 
 
 def render_file(template, file_format, data, user):
+    """
+    A helper function to render the file and it will return an error if
+    there is a problem in rendering the file.
+    """
     generator = settings.FILE_GENERATORS.get(file_format, None)
     if not generator:
         return Response(
@@ -38,13 +42,18 @@ def render_file(template, file_format, data, user):
         return serializers.FileSerializer(file).data
 
 
-class BaseViewSet(viewsets.ModelViewSet):
+# Class-based for creating the file.
 
+
+class BaseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user.id)
 
 
 class FilesViewSet(BaseViewSet):
+    """
+    Display the file form and handle the actions on the files.
+    """
     parser_classes = (FormParser, MultiPartParser, JSONParser)
 
     queryset = models.File.objects.all()
@@ -53,6 +62,9 @@ class FilesViewSet(BaseViewSet):
 
     @action(detail=False, methods=['POST'])
     def from_template(self, request):
+        """
+        For creating a file from template.
+        """
         template = request.data.pop("template", None)
 
         if template is None:
@@ -75,26 +87,42 @@ class FilesViewSet(BaseViewSet):
         )
 
     def perform_destroy(self, instance):
+        """
+        For deleting the file. It will change the
+        deleted satatus of the file to True.
+        """
         instance.deleted = True
         instance.save()
 
 
 class FileExtensionViewSet(BaseViewSet):
+    """
+    Display the file extention form.
+    """
     queryset = models.FileExtension.objects.all()
     serializer_class = serializers.FileExtensionSerializer
 
 
 class FileTypeViewSet(BaseViewSet):
+    """
+    Display the file type form.
+    """
     queryset = models.FileType.objects.all()
     serializer_class = serializers.FileTypeSerializer
 
 
 class FileTemplateViewSet(BaseViewSet):
+    """
+    Display the file template form and handle the actions on the files.
+    """
     queryset = models.FileTemplate.objects.all()
     serializer_class = serializers.FileTemplateSerializer
 
     @action(detail=False, methods=['POST'])
     def preview(self, request):
+        """
+        It will preview template rendering without save.
+        """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(True):
             template = models.FileTemplate(**serializer.validated_data)
@@ -103,8 +131,12 @@ class FileTemplateViewSet(BaseViewSet):
 
     @action(detail=True, methods=['POST'])
     def render(self, request, pk=None):
+        """
+        It will render template to file.
+        """
         template = get_object_or_404(self.queryset, pk=pk)
 
+        # preview is a boolean flag for previewing template with example data
         if request.data.get("preview") == 'true':
             data = template.example_data
         else:
@@ -135,6 +167,9 @@ class ProbeViewset(viewsets.ViewSet):
         return int(time.time() - settings.START_TIME)
 
 
-class FileTag(viewsets.ModelViewSet):
+class FileTag(BaseViewSet):
+    """
+    Display the file tag form.
+    """
     queryset = models.Tag.objects.all()
     serializer_class = serializers.FileTagSerializer
