@@ -207,9 +207,16 @@ class BaseConfiguration(Configuration):
         )
 
         REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = (
-            'rest_framework.permissions.IsAuthenticated',
             'trood.contrib.django.auth.permissions.TroodABACPermission',
         )
+
+        REST_FRAMEWORK['DEFAULT_FILTER_BACKENDS'] += (
+            'trood.contrib.django.auth.filter.TroodABACFilterBackend',
+        )
+
+        MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + [
+            'trood.contrib.django.auth.middleware.TroodABACMiddleware',
+        ]
 
     elif AUTH_TYPE == 'NONE':
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = ()
