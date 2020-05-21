@@ -249,6 +249,11 @@ class FileExtensionTestCase(APITestCase):
 class ProbeTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
+        trood_user = TroodUser({
+            "id": 1,
+        })
+
+        self.client.force_authenticate(user=trood_user)
 
     def test_create_extension(self):
         url = reverse('api:probe-list')
