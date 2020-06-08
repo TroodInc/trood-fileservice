@@ -27,6 +27,9 @@ textract==1.6.3
 docx==0.2.4
 cssutils==1.0.2
 python-docx==0.8.10
+requests==2.22.0
+six==1.12.0
+docutils==0.15.2
 boto3
 django-storages
 
