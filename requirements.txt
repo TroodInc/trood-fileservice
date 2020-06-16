@@ -33,4 +33,4 @@ docutils==0.15.2
 boto3
 django-storages
 
-trood
+trood==2020.6.dev37
