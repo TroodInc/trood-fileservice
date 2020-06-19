@@ -748,6 +748,14 @@ components:
         metadata:
           type: object
           nullable: true
+        deleted:
+          type: boolean
+        access:
+          type: string
+          maxLength: 10
+        tags:
+          type: object
+          nullable: true
     Type:
       type: object
       properties:
