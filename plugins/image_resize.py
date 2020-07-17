@@ -1,5 +1,7 @@
+import io
 import os
 from PIL import Image
+from django.core.files.storage import default_storage
 from slugify import slugify
 from datetime import datetime
 from django.conf import settings
@@ -47,7 +49,9 @@ class ImageResizePlugin(TroodBasePlugin):
                         ext
                     )
 
-                    resized.save(f'{settings.MEDIA_ROOT}/{resized_name}', resized.format)
+                    buffer = io.BytesIO()
+                    resized.save(buffer, resized.format)
+                    default_storage.save(resized_name, buffer)
 
                     resized_links[size['name']] = f'{settings.FILES_BASE_URL}{resized_name}'
 
