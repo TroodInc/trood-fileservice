@@ -107,19 +107,19 @@ class File(BaseModel):
     def save(self, *args, **kwargs):
         if not self.size:
             self.file.save(self.file.name, self.file, save=False)
-
-        if settings.STORAGE_TYPE == 'DISK':
-            self.mimetype, enc = mimetypes.guess_type(self.file.path)
-        elif settings.STORAGE_TYPE == 'DO_SPACES':
-            self.mimetype, enc = mimetypes.guess_type(self.file.storage.url(self.file.name))
+            self.size = self.file.size
 
         if not self.mimetype:
-            self.mimetype = magic.from_buffer(self.file.read(), mime=True)
+            if settings.STORAGE_TYPE == 'DISK':
+                self.mimetype, enc = mimetypes.guess_type(self.file.path)
+            elif settings.STORAGE_TYPE == 'DO_SPACES':
+                self.mimetype, enc = mimetypes.guess_type(self.file.storage.url(self.file.name))
 
-        if self.mimetype:
-            self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
+            if not self.mimetype:
+                self.mimetype = magic.from_buffer(self.file.read(), mime=True)
 
-        self.size = self.file.size
+            if self.mimetype:
+                self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
 
         super(File, self).save(*args, **kwargs)
 
