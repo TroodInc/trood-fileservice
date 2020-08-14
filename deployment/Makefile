@@ -12,4 +12,7 @@ run: build
 down:
 	@docker-compose down
 
+makemigrations:
+	@docker-compose exec python manage.py makemigrations
+
 .PHONY: run default build test down

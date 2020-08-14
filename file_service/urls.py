@@ -14,6 +14,8 @@ router.register(r'extensions', files_views.FileExtensionViewSet)
 router.register(r'types', files_views.FileTypeViewSet)
 router.register(r'templates', files_views.FileTemplateViewSet)
 router.register(r'plugins', TroodPluginsViewSet)
+router.register(r'probe', files_views.ProbeViewset, basename='probe')
+router.register(r'tag', files_views.FileTag)
 
 urlpatterns = [
     url(r'^api/v1.0/', include((router.urls, 'file_service'), namespace='api')),

@@ -27,7 +27,7 @@ class FileSerializer(serializers.ModelSerializer):
             'id', 'owner', 'created', 'file',
             'file_url', 'filename', 'origin_filename',
             'type', 'mimetype', 'size',
-            'ready', 'metadata', 'deleted',
+            'ready', 'metadata', 'deleted', 'access', 'tags'
         )
         read_only_fields = ('created', 'id', 'type', 'mimetype', 'size', 'file_url', )
 
@@ -83,3 +83,9 @@ class FromTemplateSerializer(serializers.Serializer):
     template = serializers.CharField()
     access = serializers.ChoiceField(choices=files_models.File.ACCESS_CHOICES)
     tags = serializers.PrimaryKeyRelatedField(queryset=files_models.Tag.objects.all(), many=True)
+
+
+class FileTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.Tag
+        fields = ('id', 'tag')

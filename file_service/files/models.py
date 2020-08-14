@@ -7,28 +7,75 @@ from slugify import slugify
 from datetime import datetime
 from jsonfield import JSONField
 from django.db import models
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
 
 def create_unique_filename(instance, filename):
+    """
+    Provides a unique name for the file in such a way:
+    filename + date(%d%m%y%H%M%S) + extention
+    """
     name, ext = os.path.splitext(filename)
     return '{}-{}{}'.format(slugify(name), datetime.now().strftime('%d%m%y%H%M%S'), ext)
 
 
 def validate_file_extention(value):
+    """
+    Checks the validation of file extention and return a
+    proper message in case of invalide extention.
+    """
     ext = value.name.split('.')[-1]
     allowed_extensions = FileExtension.objects.all().values_list('extension', flat=True)
     if len(allowed_extensions) and not ext.lower() in allowed_extensions and "*" not in allowed_extensions:
         raise ValidationError(_('Unsupported file type'))
 
 
-class FileType(models.Model):
+class BaseModel(models.Model):
+    """
+    A base model which contains the id of owner.
+    """
+    owner = models.IntegerField(_('Owner'), null=True)
+
+    class Meta:
+        abstract = True
+
+
+class FileType(BaseModel):
+    """
+    Type of files, such as:
+    - image/jpeg
+    - audio/x-hx-aac-adts
+    etc.
+    """
     id = models.CharField(primary_key=True, unique=True, max_length=32)
     mime = models.TextField()
 
 
-class File(models.Model):
+class File(BaseModel):
+    """
+    File model with overriden save() function to customize saving behavior.
+
+    It contains:
+    id                  id of the file in form of UUID.
+    ready               file descriptor(true or false).
+    deleted             deleted status of the file(true or false).
+    created             date of creation.
+    file                file name(which has a unique name).
+    origin_filename     original file name.
+    filename            name of the file
+    size                size of the file.
+    metadata            metadata.
+    mimetype            MIME type of the file.
+    access              file access permission.
+                        It contains 3 different permission:
+                            -Private
+                            -Protected
+                            -Public
+    type                type of file.
+    tags                file tages.
+    """
     ACCESS_CHOICES = (
         ('PRIVATE', _('Private')),
         ('PROTECTED', _('Protected')),
@@ -36,7 +83,6 @@ class File(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.IntegerField(_('Owner'), null=True)
     created = models.DateTimeField(_('Created Date'), auto_now_add=True)
 
     file = models.FileField(_('File'), upload_to=create_unique_filename, validators=(validate_file_extention, ))
@@ -52,7 +98,7 @@ class File(models.Model):
     deleted = models.BooleanField(_('Deleted'), default=False)
 
     metadata = JSONField(_('Meta data'), null=True, blank=True)
-    tags = models.ManyToManyField('Tag')
+    tags = models.ManyToManyField('Tag', null=True, blank=True)
     access = models.CharField(choices=ACCESS_CHOICES, max_length=10, default='PROTECTED')
 
     def __str__(self):
@@ -61,25 +107,38 @@ class File(models.Model):
     def save(self, *args, **kwargs):
         if not self.size:
             self.file.save(self.file.name, self.file, save=False)
-
-        self.mimetype, enc = mimetypes.guess_type(self.file.path)
+            self.size = self.file.size
 
         if not self.mimetype:
-            self.mimetype = magic.from_file(self.file.path, mime=True)
+            if settings.STORAGE_TYPE == 'DISK':
+                self.mimetype, enc = mimetypes.guess_type(self.file.path)
+            elif settings.STORAGE_TYPE == 'DO_SPACES':
+                self.mimetype, enc = mimetypes.guess_type(self.file.storage.url(self.file.name))
 
-        if self.mimetype:
-            self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
+            if not self.mimetype:
+                self.mimetype = magic.from_buffer(self.file.read(), mime=True)
 
-        self.size = self.file.size
+            if self.mimetype:
+                self.type = FileType.objects.filter(mime__contains=self.mimetype).first()
 
         super(File, self).save(*args, **kwargs)
 
 
-class FileExtension(models.Model):
+class FileExtension(BaseModel):
+    """
+    Contains the extension of the file.
+    """
     extension = models.CharField(max_length=255)
 
 
-class FileTemplate(models.Model):
+class FileTemplate(BaseModel):
+    """
+    File template model, which contains:
+    alias               alias name for file template.
+    name                name or header of the file.
+    filename_template   name of the file template.
+    body_template       contains the body of the file.
+    """
     alias = models.CharField(unique=True, max_length=128, null=True)
     name = models.CharField(max_length=128, blank=True, null=True)
     filename_template = models.CharField(max_length=128, blank=True, null=True)
@@ -88,12 +147,22 @@ class FileTemplate(models.Model):
 
 
 class Tag(models.Model):
+    """
+    Contains file tags.
+    """
     tag = models.CharField(unique=True, max_length=128)
 
 
 class FileTextContent(models.Model):
+    """
+    A model, which contains the content of file text.
+
+    content             body of the text.
+    created             date of creation.
+    source              the id of the file.
+    title               title of the text.
+    """
     source = models.ForeignKey(File, on_delete=models.CASCADE)
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True)
-
