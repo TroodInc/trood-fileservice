@@ -22,7 +22,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/File'
-          description: ''
+          description: 'List of files'
     post:
       summary: Upload the file
       tags:
@@ -44,7 +44,7 @@ paths:
                   maxLength: 128
               required:
               - file
-              - name
+              - filename
       responses:
         '201':
           content:
@@ -71,7 +71,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/File'
-          description: ''
+          description: 'File object'
     patch:
       summary: Update file object
       tags:
@@ -115,7 +115,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/File'
-          description: ''
+          description: 'Updated file object'
     delete:
       summary: Delete file
       tags:
@@ -130,7 +130,7 @@ paths:
           type: string
       responses:
         '204':
-          description: ''
+          description: 'File removed'
   /api/v1.0/extensions/:
     get:
       summary: List extensions allowed for upload
@@ -218,7 +218,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Extention'
-          description: 'Extension object was updated'
+          description: 'Extension object updated'
     delete:
       summary: Remove extension from allowed
       description: >
@@ -239,6 +239,7 @@ paths:
           description: 'Extension removed'
   /api/v1.0/types/:
     get:
+      summary: List all file types
       tags:
         - File types
       operationId: listFileTypes
@@ -250,8 +251,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Type'
-          description: ''
+          description: 'List of all file types returned'
     post:
+      summary: Adding new file type
       tags:
         - File types
       operationId: createFileType
@@ -275,9 +277,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Type'
-          description: ''
+          description: 'New file type added'
   /api/v1.0/types/{id}/:
     get:
+      summary: Get file type from list
       tags:
         - File types
       operationId: retrieveFileType
@@ -294,8 +297,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Type'
-          description: ''
+          description: 'File type object'
     patch:
+      summary: Update file type
       tags:
         - File types
       operationId: partial_updateFileType
@@ -322,8 +326,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Type'
-          description: ''
+          description: 'Updated file type object'
     delete:
+      summary: Remove file type
       tags:
         - File types
       operationId: destroyFileType
@@ -336,7 +341,7 @@ paths:
           type: string
       responses:
         '204':
-          description: ''
+          description: 'File type removed'
   /api/v1.0/templates/:
     get:
       summary: List all avaliable file templates
@@ -524,7 +529,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Template'
-          description: ''
+          description: 'Updated template object'
     delete:
       summary: Delete template
       description: >
@@ -572,7 +577,7 @@ paths:
                   - name
                   - version
                   - config
-          description: ''
+          description: 'List of all plugins'
   /api/v1.0/plugins/{id}/:
     get:
       summary: Get plugin settings
@@ -608,7 +613,7 @@ paths:
                 - name
                 - version
                 - config
-          description: ''
+          description: 'Plugin object'
     patch:
       summary: Update plugin settings
       tags:
@@ -659,7 +664,28 @@ paths:
                 - name
                 - version
                 - config
-          description: ''
+          description: 'Updated plugin object'
+  /api/v1.0/probe:
+    get:
+      summary: Get status of file service
+      tags:
+        - Probe
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    maxLength: 128
+                  version:
+                    type: string
+                    maxLength: 128
+                  uptime:
+                    type: string
+                    maxLength: 128
+          description: 'Server info'
   /api/v1.0/files/from_template/:
     post:
       deprecated: true
