@@ -44,7 +44,7 @@ paths:
                   maxLength: 128
               required:
               - file
-              - name
+              - filename
       responses:
         '201':
           content:
@@ -239,6 +239,7 @@ paths:
           description: 'Extension removed'
   /api/v1.0/types/:
     get:
+      summary: List all file types
       tags:
         - File types
       operationId: listFileTypes
@@ -252,6 +253,7 @@ paths:
                   $ref: '#/components/schemas/Type'
           description: ''
     post:
+      summary: Adding new file type
       tags:
         - File types
       operationId: createFileType
@@ -278,6 +280,7 @@ paths:
           description: ''
   /api/v1.0/types/{id}/:
     get:
+      summary: Get file type from list
       tags:
         - File types
       operationId: retrieveFileType
@@ -296,6 +299,7 @@ paths:
                 $ref: '#/components/schemas/Type'
           description: ''
     patch:
+      summary: Update file type
       tags:
         - File types
       operationId: partial_updateFileType
@@ -324,6 +328,7 @@ paths:
                 $ref: '#/components/schemas/Type'
           description: ''
     delete:
+      summary: Remove file type
       tags:
         - File types
       operationId: destroyFileType
@@ -660,6 +665,31 @@ paths:
                 - version
                 - config
           description: ''
+  /api/v1.0/probe:
+    get:
+      summary: Get status of file service
+      tags:
+        - Probe
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    maxLength: 128
+                  version:
+                    type: string
+                    maxLength: 128
+                  uptime:
+                    type: string
+                    maxLength: 128
+  /api/v1.0/tag:
+    get:
+      summary: List all tags
+      tags:
+        - Tag
   /api/v1.0/files/from_template/:
     post:
       deprecated: true
