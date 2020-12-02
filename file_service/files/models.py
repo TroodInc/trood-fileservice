@@ -146,7 +146,7 @@ class FileTemplate(BaseModel):
     example_data = JSONField(null=True)
 
 
-class Tag(models.Model):
+class Tag(BaseModel):
     """
     Contains file tags.
     """

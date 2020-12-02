@@ -1,13 +1,15 @@
 import base64
 import os
 import tempfile
+import json
 
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
+from plugins.png_file_generator import PNGFileGenerator
 
-from file_service.files.models import FileExtension, FileType
+from file_service.files.models import FileExtension, FileType, FileTemplate, Tag
 from trood.contrib.django.auth.authentication import TroodUser
 
 aac_file_data = "//FQgCi//N4CAExhdmM1Ny44OS4xMDAAQjYf///8MACPslW0kC0TE0TC0LBc31HLWWcVF1U1lqfcrWhzJUSt2Otf//IYZnBrSL7MwvbLX0D7XXMXU/6889ow33jjGYuyV8DO0nBtk9c2PnoELJsgeAkY+fYUb+W+Z2VJm7GwZsGZhuwRMN0iJhmwHYDmI+cr8AnEr5QZEm6ZunYlff0lYLcP84ORJpErmITIWXe1mLinxBzo8CzywwCxMuhLgGBsByI+0lnLYppx5jYceouxDYbOAgIXKMkQZ7BUJYUFB6Jafrl479u6gJcuzSty3MCwEZ2zgU8py5GS5ZkWWZZ2pAz9kud1731ZZRAQFkmzPLsuOyqfMJZ8z8fnTLHjrSCLReHQ+LReLQ+FzfUctZZxUXVTWWp9ytaDDQ2AAAAAAAAAAAAAcP/xUIAqf/whGw////2NAEdYqvoaFo4FoYDooHo6C741Rz045vjLzVFpT8uEmRVUnneQP3Ow9Z7R/vKzf+V48TzVvGcz89SbrruJvu4+kge3N1C+Viqn6rvOF+9+9+B46+Q0jicTx20j8DjTPHazkaVLGsWuc1muvsDlM7GmVIs7OqWMbI2EXI5TicTOxrztMK82HI1mu41Nf8dynjtZrthyONYzuRxuY//uUWoA0la2WNyONambK+0ONyPWazZbDibDGqWM7O7Wbwdy8/sYv5fuho8Hiw4oQ3NqOpZqamaiyuizRZCEkNGaFGa7S7klkJKM0NSSdkhPFcSKi8iaS8jUzQ5N4ZoaklGpqZpqM1mpJcFGpMdGuvuRpG9xKMvOUqZ2djZHExw50Ii0Yi0Ih0Xi0nhd8ao56cc3xl5qi0p+XCTIqjWt4AAAAAAAAAAAAAAADg=="
@@ -261,3 +263,82 @@ class ProbeTestCase(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         for key in ('status', 'uptime', 'version'):
             assert key in response.data, response.json()
+
+class TagTestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        trood_user = TroodUser({
+            "id": 1,
+        })
+        self.tag = Tag.objects.create(tag="test_tag")
+        self.client.force_authenticate(user=trood_user)
+
+    def test_create_tag(self):
+        url = reverse('api:tag-list')
+        response = self.client.post(
+            url,
+            json.dumps({"tag": "another_tag"}),
+            content_type='application/json')
+        assert response.data['tag'] == 'another_tag'
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Tag.objects.count() == 2
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class TemplatesRenderTestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        trood_user = TroodUser({
+            "id": 1,
+        })
+        self.template = FileTemplate.objects.create(
+            alias="string",
+            name="string",
+            filename_template="string",
+            body_template="string")
+        self.client.force_authenticate(user=trood_user)
+        PNGFileGenerator.register()
+
+    def test_render_template(self):
+        url = f'/api/v1.0/templates/{self.template.id}/render/'
+        response = self.client.post(
+            url,
+            json.dumps({"data": {},
+                        "format": "PNG"}),
+            content_type='application/json')
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_incorrect_render_template(self):
+        url = f'/api/v1.0/templates/{self.template.id}/render/'
+        response = self.client.post(
+            url,
+            json.dumps({"data": {}}),
+            content_type='application/json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_template_preview(self):
+        url = f'/api/v1.0/templates/preview/'
+        response = self.client.post(
+            url,
+            json.dumps({
+                "alias": "string23",
+                "name": "string",
+                "filename_template": "string",
+                "body_template": "string",
+                "example_data": {},
+                "format": "PNG"}),
+            content_type='application/json')
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_invalid_template_preview(self):
+        url = f'/api/v1.0/templates/preview/'
+        response = self.client.post(
+            url,
+            json.dumps({
+                "alias": "string23",
+                "name": "string",
+                "filename_template": "string",
+                "body_template": "string",
+                "example_data": {}}),
+            content_type='application/json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
