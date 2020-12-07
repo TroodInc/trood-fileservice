@@ -133,6 +133,7 @@ class BaseConfiguration(Configuration):
         MEDIA_ROOT = os.environ.get('FILE_SERVICE_MEDIA_ROOT', 'media')
 
         AWS_LOCATION = os.path.join(os.environ.get('SPACES_PATH', ''), MEDIA_ROOT)
+        AWS_DEFAULT_ACL = os.environ.get('SPACES_DEFAULT_PERMISSIONS', 'public-read')
 
     IMAGE_SIZES = {
         'small': 128,
