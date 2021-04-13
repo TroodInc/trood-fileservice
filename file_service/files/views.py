@@ -83,6 +83,18 @@ class FilesViewSet(BaseViewSet):
             }
         )
 
+    @action(detail=True, methods=['GET'])
+    def content(self, request, pk=None):
+        content = models.FileTextContent.objects.filter(source_id=pk).first()
+        if content:
+            serializer = serializers.FileTextContentSerializer(instance=content)
+            return Response(serializer.data)
+        return Response(
+            data={"status": "ERROR", "message": "No content for current file"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
     def perform_destroy(self, instance):
         """
         For deleting the file. It will change the

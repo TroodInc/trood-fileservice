@@ -89,3 +89,9 @@ class FileTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = files_models.Tag
         fields = ('id', 'tag')
+
+
+class FileTextContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileTextContent
+        fields = '__all__'
