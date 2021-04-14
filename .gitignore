@@ -2,6 +2,8 @@
 
 deployment/postgres
 
+/venv/
+/media/
 __pycache__
 *.pyc
 .idea/*
