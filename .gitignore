@@ -4,6 +4,8 @@ deployment/postgres
 
 /venv/
 /media/
+/htmlcov/
+.coverage
 __pycache__
 *.pyc
 .idea/*
