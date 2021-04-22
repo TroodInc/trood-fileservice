@@ -1,5 +1,6 @@
 import io
 import re
+import os
 
 import textract
 from django.db.models import signals
@@ -7,6 +8,7 @@ import requests
 
 from file_service.files.models import FileTextContent
 from trood.contrib.django.apps.plugins.core import TroodBasePlugin
+from trood.contrib.django.apps.plugins.models import TroodPluginModel
 from trood.core.utils import get_service_token
 
 
@@ -32,23 +34,25 @@ class SearchIndexUpdaterPlugin(TroodBasePlugin):
 
     @classmethod
     def update(cls, sender, instance, created, **kwargs):
-        if created:
-            action = 'create'
-        else:
-            action = 'update'
+        plugin = TroodPluginModel.objects.filter(id=cls.id).first()
+        if plugin and plugin.active:
+            if created:
+                action = 'create'
+            else:
+                action = 'update'
 
-        response_data = {'events': [{
-            'object': 'file',
-            'action': action,
-            'current': {
-                'id': instance.id,
-                'content': instance.content,
-                'source_id': instance.source_id,
-                'title': instance.title
-            },
-            'previous': {}
-        }]}
-        requests.post(f'{self.host}/index/', json=response_data, headers=self.headers)
+            response_data = {'events': [{
+                'object': 'file',
+                'action': action,
+                'current': {
+                    'id': instance.id,
+                    'content': instance.content,
+                    'source_id': instance.source_id,
+                    'title': instance.title
+                },
+                'previous': {}
+            }]}
+            requests.post(f'{cls.host}/index/', json=response_data, headers=cls.headers)
 
     @classmethod
     def delete(cls, sender, instance, **kwargs):
@@ -63,5 +67,5 @@ class SearchIndexUpdaterPlugin(TroodBasePlugin):
                 'title': instance.title
             }
         }]}
-        requests.post(f'{self.host}/index/', json=response_data, headers=self.headers)
+        requests.post(f'{cls.host}/index/', json=response_data, headers=cls.headers)
 
