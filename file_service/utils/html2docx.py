@@ -433,7 +433,7 @@ class PageStyleProcesser(BaseStyleHandler):
         for rule in self.page_rules:
             if "font-size" in rule.style.keys():
                 font_size = rule.style["font-size"]
-                font_size = ''.join(re.findall('[^px]', font_size))
+                font_size = ''.join(re.findall('\d+', font_size))
                 font_size_px = int(font_size)
                 font_size_pt = convert_px_to_pt(font_size_px)
                 style = self.document.styles['Normal']
@@ -444,6 +444,11 @@ class PageStyleProcesser(BaseStyleHandler):
                 style = self.document.styles['Normal']
                 font = style.font
                 font.name = font_type.capitalize()
+            if "font-weight" in rule.style.keys():
+                font_wight = rule.style['font-weight']
+                if font_wight == "bold":
+                    font.bold = True
+
 
     def apply_styles(self, css_styles):
         self.setup_styles(css_styles)
@@ -490,7 +495,7 @@ class ParagraphStyleHandler(BaseStyleHandler):
         for rule in self.tag_rules:
             if "font-size" in rule.style.keys():
                 font_size = rule.style["font-size"]
-                font_size = ''.join(re.findall('[^px]', font_size))
+                font_size = ''.join(re.findall('\d+', font_size))
                 font_size_px = int(font_size)
                 font_size_pt = convert_px_to_pt(font_size_px)
                 font = run.font
@@ -503,6 +508,8 @@ class ParagraphStyleHandler(BaseStyleHandler):
                 font_wight = rule.style['font-weight']
                 if font_wight == "bold" or tag.name == 'b':
                     run.bold = True
+                    # We do not need new line with <b> so we strip
+                    run.text = run.text.strip()
 
 
 class CellStyleHandler(BaseStyleHandler):
