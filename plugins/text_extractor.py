@@ -6,6 +6,7 @@ from django.db.models import signals
 
 from file_service.files.models import File, FileTextContent
 from trood.contrib.django.apps.plugins.core import TroodBasePlugin
+from trood.contrib.django.apps.plugins.models import TroodPluginModel
 
 
 class TextExtractorPlugin(TroodBasePlugin):
@@ -49,26 +50,28 @@ class TextExtractorPlugin(TroodBasePlugin):
 
     @classmethod
     def extract(cls, sender, **kwargs):
-        file = kwargs.get('instance')
-        config = cls.get_config()
+        plugin = TroodPluginModel.objects.filter(id=cls.id).first()
+        if plugin and plugin.active:
+            file = kwargs.get('instance')
+            config = cls.get_config()
 
-        extractable_mimetype = file.mimetype in config['extractable_mimetypes']
+            extractable_mimetype = file.mimetype in config['extractable_mimetypes']
 
-        not_extracted = True if not file.metadata or file.metadata.get(
-            'text_extracted', 'not_extracted') == 'not_extracted' else False
+            not_extracted = True if not file.metadata or file.metadata.get(
+                'text_extracted', 'not_extracted') == 'not_extracted' else False
 
-        if extractable_mimetype and not_extracted:
-            try:
-                filepath = file.file.path
-                b_text = textract.process(filepath)
-                title = file.origin_filename.split('.')[0]
-                raw_text = b_text.decode("utf-8")
-                text = re.sub(r'\s+', ' ', re.sub(r'<[^<]+>', ' ', raw_text))
-                FileTextContent.objects.create(
-                    source=file, content=text, title=title)
-                cls._set_metadata(file, True)
-            except: 
-                cls._set_metadata(file, False)
+            if extractable_mimetype and not_extracted:
+                try:
+                    filepath = file.file.path
+                    b_text = textract.process(filepath)
+                    title = file.origin_filename.split('.')[0]
+                    raw_text = b_text.decode("utf-8")
+                    text = re.sub(r'\s+', ' ', re.sub(r'<[^<]+>', ' ', raw_text))
+                    FileTextContent.objects.create(
+                        source=file, content=text, title=title)
+                    cls._set_metadata(file, True)
+                except:
+                    cls._set_metadata(file, False)
 
     @classmethod
     def _set_metadata(self, file, value):

@@ -19,7 +19,7 @@ def move_uploaded_file(file, name=str(uuid4())):
 
 class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
-    metadata = serializers.JSONField(required=False)
+    metadata = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model = files_models.File
@@ -89,3 +89,9 @@ class FileTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = files_models.Tag
         fields = ('id', 'tag')
+
+
+class FileTextContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = files_models.FileTextContent
+        fields = '__all__'

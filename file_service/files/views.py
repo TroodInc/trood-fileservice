@@ -20,10 +20,7 @@ def render_file(template, file_format, data, user):
     """
     generator = settings.FILE_GENERATORS.get(file_format, None)
     if not generator:
-        return Response(
-            data={"error": "File with format {} cannot be created".format(file_format)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return {"error": "File with format {} cannot be created".format(file_format)}
     else:
         file_data = generator.create(template.body_template, data)
 
@@ -86,6 +83,18 @@ class FilesViewSet(BaseViewSet):
             }
         )
 
+    @action(detail=True, methods=['GET'])
+    def content(self, request, pk=None):
+        content = models.FileTextContent.objects.filter(source_id=pk).first()
+        if content:
+            serializer = serializers.FileTextContentSerializer(instance=content)
+            return Response(serializer.data)
+        return Response(
+            data={"status": "ERROR", "message": "No content for current file"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
     def perform_destroy(self, instance):
         """
         For deleting the file. It will change the
@@ -127,6 +136,8 @@ class FileTemplateViewSet(BaseViewSet):
         if serializer.is_valid(True):
             template = models.FileTemplate(**serializer.validated_data)
             result = render_file(template, request.data.get('format'), template.example_data, request.user)
+            if "error" in result:
+                return Response(data={"status": "ERROR", "error": result['error']}, status=status.HTTP_400_BAD_REQUEST)
             return Response(data={"status": "OK", "data": result}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['POST'])
@@ -143,6 +154,8 @@ class FileTemplateViewSet(BaseViewSet):
             data = request.data.pop("data", None)
 
         result = render_file(template, request.data.get('format'), data, request.user)
+        if "error" in result:
+            return Response(data={"status": "ERROR", "error": result['error']}, status=status.HTTP_400_BAD_REQUEST)
         return Response(data={"status": "OK", "data": result}, status=status.HTTP_201_CREATED)
 
 
