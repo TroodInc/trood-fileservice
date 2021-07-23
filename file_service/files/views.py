@@ -55,7 +55,7 @@ class FilesViewSet(BaseViewSet):
 
     queryset = models.File.objects.all()
     serializer_class = serializers.FileSerializer
-    filter_fields = ('deleted', )
+    filter_fields = ('deleted',)
 
     @action(detail=False, methods=['POST'])
     def from_template(self, request):
@@ -94,7 +94,6 @@ class FilesViewSet(BaseViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-
     def perform_destroy(self, instance):
         """
         For deleting the file. It will change the
@@ -102,6 +101,11 @@ class FilesViewSet(BaseViewSet):
         """
         instance.deleted = True
         instance.save()
+
+    @action(detail=False, methods=['DELETE'])
+    def bulk(self, request):
+        models.File.objects.filter(id__in=request.data).update(deleted=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FileExtensionViewSet(BaseViewSet):
