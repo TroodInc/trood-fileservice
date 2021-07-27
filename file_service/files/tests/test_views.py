@@ -15,6 +15,7 @@ from trood.contrib.django.auth.authentication import TroodUser
 aac_file_data = "//FQgCi//N4CAExhdmM1Ny44OS4xMDAAQjYf///8MACPslW0kC0TE0TC0LBc31HLWWcVF1U1lqfcrWhzJUSt2Otf//IYZnBrSL7MwvbLX0D7XXMXU/6889ow33jjGYuyV8DO0nBtk9c2PnoELJsgeAkY+fYUb+W+Z2VJm7GwZsGZhuwRMN0iJhmwHYDmI+cr8AnEr5QZEm6ZunYlff0lYLcP84ORJpErmITIWXe1mLinxBzo8CzywwCxMuhLgGBsByI+0lnLYppx5jYceouxDYbOAgIXKMkQZ7BUJYUFB6Jafrl479u6gJcuzSty3MCwEZ2zgU8py5GS5ZkWWZZ2pAz9kud1731ZZRAQFkmzPLsuOyqfMJZ8z8fnTLHjrSCLReHQ+LReLQ+FzfUctZZxUXVTWWp9ytaDDQ2AAAAAAAAAAAAAcP/xUIAqf/whGw////2NAEdYqvoaFo4FoYDooHo6C741Rz045vjLzVFpT8uEmRVUnneQP3Ow9Z7R/vKzf+V48TzVvGcz89SbrruJvu4+kge3N1C+Viqn6rvOF+9+9+B46+Q0jicTx20j8DjTPHazkaVLGsWuc1muvsDlM7GmVIs7OqWMbI2EXI5TicTOxrztMK82HI1mu41Nf8dynjtZrthyONYzuRxuY//uUWoA0la2WNyONambK+0ONyPWazZbDibDGqWM7O7Wbwdy8/sYv5fuho8Hiw4oQ3NqOpZqamaiyuizRZCEkNGaFGa7S7klkJKM0NSSdkhPFcSKi8iaS8jUzQ5N4ZoaklGpqZpqM1mpJcFGpMdGuvuRpG9xKMvOUqZ2djZHExw50Ii0Yi0Ih0Xi0nhd8ao56cc3xl5qi0p+XCTIqjWt4AAAAAAAAAAAAAAADg=="
 jpg_file_data = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q=="
 
+
 def create_temp_file(ext='.txt', data=None, name=None):
     if name:
         filename = '{}/{}{}'.format(tempfile.gettempdir(), name, ext)
@@ -123,12 +124,36 @@ class FilesBehaviourTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
-        data = {"metadata": {'message':  'Error something goes wrong'}, 'ready': False}
+        data = {"metadata": {'message': 'Error something goes wrong'}, 'ready': False}
         response = self.client.patch(url, data=data, format="json")
-        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['ready'], False)
         self.assertEqual(response.data['metadata']['message'], 'Error something goes wrong')
+
+    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+    def test_bulk_delete_files(self):
+        url = reverse('api:file-list')
+        test_file_1, test_file_path = create_temp_file('.jpg', data=jpg_file_data)
+        test_file_2, test_file_path = create_temp_file('.jpg', data=jpg_file_data)
+        file_data_1 = {'file': test_file_1, 'name': 'myfile1'}
+        file_data_2 = {'file': test_file_2, 'name': 'myfile2'}
+        response_1 = self.client.post(url, data=file_data_1, format='multipart')
+        response_2 = self.client.post(url, data=file_data_2, format='multipart')
+        self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_2.status_code, status.HTTP_201_CREATED)
+
+        url = "/api/v1.0/files/bulk/"
+        data = [response_1.data['id'], response_2.data['id']]
+        response = self.client.delete(url, data=data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = reverse('api:file-detail', kwargs={'pk': response_1.data['id']})
+        response = self.client.get(url)
+        assert response.data['deleted'] is True
+
+        url = reverse('api:file-detail', kwargs={'pk': response_2.data['id']})
+        response = self.client.get(url)
+        assert response.data['deleted'] is True
 
 
 class FileExtensionTestCase(APITestCase):
@@ -139,7 +164,6 @@ class FileExtensionTestCase(APITestCase):
         })
 
         self.client.force_authenticate(user=trood_user)
-
 
     def test_create_extension(self):
         data = {
@@ -263,6 +287,7 @@ class ProbeTestCase(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         for key in ('status', 'uptime', 'version'):
             assert key in response.data, response.json()
+
 
 class TagTestCase(APITestCase):
     def setUp(self):
