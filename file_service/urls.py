@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 
 from trood.contrib.django.apps.plugins.views import TroodPluginsViewSet
+from trood.contrib.django.apps.meta.views import TroodMetaView
 from .files import views as files_views
 
 router = DefaultRouter()
@@ -18,6 +19,7 @@ router.register(r'probe', files_views.ProbeViewset, basename='probe')
 router.register(r'tag', files_views.FileTag)
 
 urlpatterns = [
+    url(r'meta', TroodMetaView.as_view(), name='meta'),
     url(r'^api/v1.0/', include((router.urls, 'file_service'), namespace='api')),
 ]
 
