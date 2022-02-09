@@ -227,6 +227,20 @@ class BaseConfiguration(Configuration):
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = ()
         REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ()
 
+    if os.environ.get('CELERY_BROKER_URL'):
+        CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+
+    if os.environ.get('EAGER') == 'True':
+        CELERY_ALWAYS_EAGER = True
+        CELERY_EAGER_PROPAGATES = True
+
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_SERIALIZER = 'json'
+    CELERY_QUEUES = {'file_service.*': {'queue': 'fs'}}
+    CELERY_ROUTES = {
+        "file_service.*": {"queue": "fs"}
+    }
+
 
 class Development(BaseConfiguration):
     DEBUG = True

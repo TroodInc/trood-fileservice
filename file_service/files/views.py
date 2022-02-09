@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from django.template import Context
 from django.template import Template as DjangoTemplate
 
+from file_service.files.models import File
+from file_service.files.tasks import make_zip
+
 
 def render_file(template, file_format, data, user):
     """
@@ -56,6 +59,14 @@ class FilesViewSet(BaseViewSet):
     queryset = models.File.objects.all()
     serializer_class = serializers.FileSerializer
     filter_fields = ('deleted',)
+
+    @action(detail=False, methods=['POST'])
+    def zip(self, request):
+        files = request.data.pop('files', [])
+        dummy_name = "NOTREADY"
+        result = File.objects.create(file=ContentFile(content=b"File is not ready", name=dummy_name))
+        make_zip.delay(files, result.id)
+        return Response(data={"zip": serializers.FileSerializer(instance=result).data})
 
     @action(detail=False, methods=['POST'])
     def from_template(self, request):

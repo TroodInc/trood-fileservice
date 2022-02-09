@@ -35,5 +35,6 @@ boto3
 django-storages
 pytesseract==0.3.7
 pdf2image==1.16.0
+celery[redis]==5.2.3
 
 trood==2021.11.dev66
