@@ -60,13 +60,20 @@ class FilesViewSet(BaseViewSet):
     serializer_class = serializers.FileSerializer
     filter_fields = ('deleted',)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        result_status = status.HTTP_200_OK if instance.ready else status.HTTP_202_ACCEPTED
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=result_status)
+
     @action(detail=False, methods=['POST'])
     def zip(self, request):
         files = request.data.pop('files', [])
         dummy_name = "NOTREADY"
         result = File.objects.create(file=ContentFile(content=b"File is not ready", name=dummy_name))
         make_zip.delay(files, result.id)
-        return Response(data={"zip": serializers.FileSerializer(instance=result).data})
+        return Response(data={"id": result.id})
 
     @action(detail=False, methods=['POST'])
     def from_template(self, request):
