@@ -61,7 +61,7 @@ class FilesBehaviourTestCase(APITestCase):
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.data['size'], os.path.getsize(test_file_path))
         self.assertEqual(response.data['mimetype'], 'image/jpeg')
         self.assertEqual(response.data['type'], 'IMAGE')
@@ -79,7 +79,7 @@ class FilesBehaviourTestCase(APITestCase):
         url = reverse('api:file-detail', kwargs={'pk': response.data['id']})
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.data['type'], 'AUDIO')
         self.assertEqual(response.data['mimetype'], 'audio/x-hx-aac-adts')
 
