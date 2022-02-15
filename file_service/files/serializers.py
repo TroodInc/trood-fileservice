@@ -41,6 +41,12 @@ class FileSerializer(serializers.ModelSerializer):
                 'origin_filename': data['file'].name
             })
 
+            ready = True
+            if data.get('ready') is not None:
+                ready = data['ready']
+        
+            data.update({'ready': ready})
+
         return super(FileSerializer, self).to_internal_value(data)
 
     def to_representation(self, instance):
