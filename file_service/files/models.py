@@ -105,8 +105,6 @@ class File(BaseModel):
         return self.filename if self.filename else 'No name'
 
     def save(self, *args, **kwargs):
-        self.ready = True
-
         if not self.size:
             self.file.save(self.file.name, self.file, save=False)
             self.size = self.file.size
