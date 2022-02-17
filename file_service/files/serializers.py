@@ -4,7 +4,6 @@ from uuid import uuid4
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework import serializers
-from rest_framework.fields import JSONField
 
 from file_service.files import models as files_models
 
@@ -20,6 +19,7 @@ def move_uploaded_file(file, name=str(uuid4())):
 class FileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     metadata = serializers.JSONField(required=False, allow_null=True)
+    ready = serializers.BooleanField(required=False, default=True)
 
     class Meta:
         model = files_models.File
