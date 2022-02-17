@@ -93,7 +93,7 @@ class File(BaseModel):
     type = models.ForeignKey(FileType, null=True, blank=True, on_delete=models.SET_NULL)
     mimetype = models.CharField(_('Mimetype'), max_length=128, blank=True, null=True)
     size = models.IntegerField(_('File size'))
-    ready = models.BooleanField(_('Ready'), default=False)
+    ready = models.BooleanField(_('Ready'), default=True)
 
     deleted = models.BooleanField(_('Deleted'), default=False)
 
