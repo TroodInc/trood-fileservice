@@ -37,4 +37,4 @@ pytesseract==0.3.7
 pdf2image==1.16.0
 celery[redis]
 
-trood==1.0.5
+trood==1.0.6
