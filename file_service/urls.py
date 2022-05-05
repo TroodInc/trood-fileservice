@@ -3,6 +3,7 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
+from trood.contrib.django.apps.fixtures.views import TroodFixturesViewSet
 
 from trood.contrib.django.apps.plugins.views import TroodPluginsViewSet
 from trood.contrib.django.apps.meta.views import TroodMetaView
@@ -17,6 +18,9 @@ router.register(r'templates', files_views.FileTemplateViewSet)
 router.register(r'plugins', TroodPluginsViewSet)
 router.register(r'probe', files_views.ProbeViewset, basename='probe')
 router.register(r'tag', files_views.FileTag)
+
+if settings.DEBUG:
+    router.register(r'fixtures', TroodFixturesViewSet, basename='fixtures')
 
 urlpatterns = [
     url(r'meta', TroodMetaView.as_view(), name='meta'),
